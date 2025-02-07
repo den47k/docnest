@@ -17,14 +17,17 @@ class InviteTeamMember
 
         $userToInvite = User::where('email', $email)->first();
 
-        // $invitation = $team->teamInvitations()->create([
-        //     'user_id' => optional($userToInvite)->id,
-        //     'email' => $email,
-        //     'role' => $role,
-        // ]);
+        $invitation = $team->teamInvitations()->create([
+            'user_id' => optional($userToInvite)->id,
+            'inviter_id' => $user->id,
+            'email' => $email,
+            'role' => $role,
+        ]);
+
+        $invitationId = $invitation->id;
 
         if ($userToInvite) {
-            $userToInvite->notify(new TeamInvitationNotification($user, $team, $email));
+            $userToInvite->notify(new TeamInvitationNotification($invitationId, $user, $team, $email));
         }
     }
 

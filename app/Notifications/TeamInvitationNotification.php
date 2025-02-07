@@ -7,13 +7,13 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 
 class TeamInvitationNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    protected string $invitationId;
     protected User $user;
     protected Team $team;
     protected string $email;
@@ -21,8 +21,9 @@ class TeamInvitationNotification extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(User $user, Team $team, string $email)
+    public function __construct(string $invitationId, User $user, Team $team, string $email)
     {
+        $this->invitationId = $invitationId;
         $this->user = $user;
         $this->team = $team;
         $this->email = $email;
@@ -46,6 +47,7 @@ class TeamInvitationNotification extends Notification implements ShouldQueue
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
+            'invitation_id' => $this->invitationId,
             'team_id' => $this->team->id,
             'team_name' => $this->team->name,
             'inviter_id' => $this->user->id,
@@ -53,7 +55,6 @@ class TeamInvitationNotification extends Notification implements ShouldQueue
             'inviter_email' => $this->user->email,
             'email' => $this->email,
             'message' => 'You have been invited to join the team.',
-            'url' => url("/teams/join/{$this->team->id}?email={$this->email}")
         ]);
     }
 }

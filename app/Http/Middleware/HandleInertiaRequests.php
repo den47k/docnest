@@ -29,10 +29,19 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        if (!$user = $request->user()) {
+            return [];
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => array_merge(
+                    $user->toArray(),
+                    [
+                        'all_teams' => $user->allTeams()->get()->toArray(),
+                    ],
+                )
             ],
         ];
     }

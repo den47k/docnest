@@ -2,11 +2,11 @@ import { buttonVariants } from '@/Components/ui/button';
 import { ElementType, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { FileText, Trash2, Users, Plus, Settings } from 'lucide-react';
-import { usesidebarContext } from '@/contexts/SidebarContext';
+import { useSidebarContext } from '@/contexts/SidebarContext';
 import { Button } from '@/Components/ui/button';
 
 export function Sidebar() {
-  const { isSidebarOpen, setSidebarClose } = usesidebarContext();
+  const { isSidebarOpen, setSidebarClose } = useSidebarContext();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {

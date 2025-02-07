@@ -12,7 +12,7 @@ type SidebarContextType = {
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
 
-export function usesidebarContext() {
+export function useSidebarContext() {
   const value = useContext(SidebarContext);
 
   if (value == null) throw Error("Cannot use outside of SidebarProvider");

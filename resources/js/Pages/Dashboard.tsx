@@ -21,7 +21,7 @@ export default function Dashboard() {
 
       <button
         onClick={() => {
-          router.post('/teams/invitations/3', {});
+          router.post('/teams/invitations/13', {});
         }}
       >
         Accept invitation

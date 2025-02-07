@@ -3,22 +3,36 @@
 namespace App\Models;
 
 use App\Models\Team;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class TeamInvitation extends Model
 {
+    use HasUuids;
+
+    // protected $keyType = 'string';
+    // public $incrementing = false;
+
     protected $fillable = [
         'team_id',
         'email',
         'role',
-        'user_id'
+        'user_id',
+        'inviter_id',
     ];
 
-    public function team() {
+    public function team()
+    {
         return $this->belongsTo(Team::class);
     }
 
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class);
+    }
+
+    public function inviter()
+    {
+        return $this->belongsTo(User::class, 'inviter_id');
     }
 }
