@@ -1,8 +1,10 @@
 import { CreateTeamModal } from '@/Components/CreateTeamModal';
-import TeamInvitationNotification from '@/Components/TeamInvitationNotification';
+import { Toaster } from '@/Components/ui/toaster';
 import { ModalProvider } from '@/contexts/ModalContext';
 import { SidebarProvider } from '@/contexts/SidebarContext';
+import { useToast } from '@/hooks/use-toast';
 import { usePage } from '@inertiajs/react';
+import { ToastAction } from '@radix-ui/react-toast';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
 import { Header } from './Partials/header';
@@ -19,6 +21,7 @@ export type TeamInvitation = {
   inviter_email: string;
   email: string;
   message: string;
+  toastId?: string;
 };
 
 type AuthenticatedLayoutProps = {
@@ -35,6 +38,7 @@ export default function AuthenticatedLayout({
   );
   const [currentNotification, setCurrentNotification] =
     useState<TeamInvitation | null>(null);
+  const { toast, dismiss } = useToast();
 
   useEffect(() => {
     axios
@@ -57,7 +61,7 @@ export default function AuthenticatedLayout({
       channel.notification((notification: TeamInvitation) => {
         console.log('New notification:', notification);
         setNotificationQueue((prev) => [...prev, notification]);
-        setNotifications((prev) => [...prev, notification])
+        setNotifications((prev) => [...prev, notification]);
       });
 
       return () => {
@@ -68,50 +72,100 @@ export default function AuthenticatedLayout({
 
   useEffect(() => {
     if (!currentNotification && notificationQueue.length > 0) {
-      setCurrentNotification(notificationQueue[0]);
+      const nextNotification = notificationQueue[0];
+      setCurrentNotification(nextNotification);
       setNotificationQueue((prev) => prev.slice(1));
+
+      const toastId = toast({
+        title: 'Team Invitation',
+        description: `${nextNotification.inviter_name} invited you to join ${nextNotification.team_name}.`,
+        duration: 6000,
+        action: (
+          <>
+            <ToastAction
+              className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+              altText="Deny"
+              onClick={() => {
+                handleInvitationAction(nextNotification, 'deny', toastId.id);
+                handleNotificationClose();
+              }}
+            >
+              Deny
+            </ToastAction>
+            <ToastAction
+              className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+              altText="Accept"
+              onClick={() => {
+                handleInvitationAction(nextNotification, 'accept', toastId.id);
+                handleNotificationClose();
+              }}
+            >
+              Accept
+            </ToastAction>
+          </>
+        ),
+      });
+
+      nextNotification.toastId = toastId.id;
     }
-  }, [notificationQueue, currentNotification]);
+  }, [notificationQueue, currentNotification, toast]);
 
   const handleNotificationClose = () => {
     setCurrentNotification(null);
   };
 
-  const handleInvitationAction = async (invitation: TeamInvitation, action: 'accept' | 'deny') => {
+  const handleInvitationAction = async (
+    invitation: TeamInvitation,
+    action: 'accept' | 'deny',
+    toastId?: string,
+  ) => {
     try {
-      const endpoint = action === 'accept'
-        ? route('teams.invitations.store', { invitation: invitation.invitation_id })
-        : route('teams.invitations.destroy', { invitation: invitation.invitation_id });
+      const endpoint =
+        action === 'accept'
+          ? route('teams.invitations.store', {
+              invitation: invitation.invitation_id,
+            })
+          : route('teams.invitations.destroy', {
+              invitation: invitation.invitation_id,
+            });
 
-      await (action === 'accept' ? axios.post(endpoint) : axios.delete(endpoint));
+      await (action === 'accept'
+        ? axios.post(endpoint)
+        : axios.delete(endpoint));
 
-      setNotifications((prev) => prev.filter((n) => n.invitation_id !== invitation.invitation_id));
+      setNotifications((prev) =>
+        prev.filter((n) => n.invitation_id !== invitation.invitation_id),
+      );
+
       if (currentNotification?.invitation_id === invitation.invitation_id) {
         setCurrentNotification(null);
       }
+
+      if (toastId) {
+        dismiss(toastId)
+      }
+
     } catch (error) {
-      console.error(`Error ${action === 'accept' ? 'accepting' : 'denying'} invitation`, error);
+      console.error(
+        `Error ${action === 'accept' ? 'accepting' : 'denying'} invitation`,
+        error,
+      );
     }
   };
 
   return (
     <SidebarProvider>
       <ModalProvider>
-        <div className="flex max-h-screen flex-col"></div>
-        <Header notifications={notifications} onInvitationAction={handleInvitationAction} />
-        <Sidebar />
-        {children}
-        <CreateTeamModal />
-        {currentNotification && (
-          <TeamInvitationNotification
-            key={currentNotification.invitation_id}
-            inviterName={currentNotification.inviter_name}
-            teamName={currentNotification.team_name}
-            onAccept={() => handleInvitationAction(currentNotification, 'accept')}
-            onDeny={() => handleInvitationAction(currentNotification, 'deny')}
-            handleNotificationClose={handleNotificationClose}
+        <div className="flex max-h-screen flex-col">
+          <Header
+            notifications={notifications}
+            onInvitationAction={handleInvitationAction}
           />
-        )}
+          <Sidebar />
+          {children}
+          <CreateTeamModal />
+          <Toaster />
+        </div>
       </ModalProvider>
     </SidebarProvider>
   );

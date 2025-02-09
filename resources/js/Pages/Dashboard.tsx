@@ -17,15 +17,6 @@ export default function Dashboard() {
       >
         Invite user with id 2
       </button>
-      <br /><br /><br />
-
-      <button
-        onClick={() => {
-          router.post('/teams/invitations/13', {});
-        }}
-      >
-        Accept invitation
-      </button>
     </AuthenticatedLayout>
   );
 }

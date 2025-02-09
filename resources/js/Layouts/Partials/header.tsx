@@ -39,7 +39,7 @@ const teams = [
 
 type HeaderProps = {
   notifications: TeamInvitation[];
-  onInvitationAction: (invitation: TeamInvitation, action: 'accept' | 'deny') => void;
+  onInvitationAction: (invitation: TeamInvitation, action: 'accept' | 'deny', toastId?: string) => void;
 };
 
 export function Header({ notifications, onInvitationAction }: HeaderProps) {
@@ -64,7 +64,7 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="text-lg font-bold">DockNest</span>
+          <span className="text-lg font-bold">DocNest</span>
         </div>
 
         {/* Search Bar */}
@@ -169,13 +169,13 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => onInvitationAction(notification, 'deny')}
+                          onClick={() => onInvitationAction(notification, 'deny', notification.toastId)}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                         <Button
                           size="icon"
-                          onClick={() => onInvitationAction(notification, 'accept')}
+                          onClick={() => onInvitationAction(notification, 'accept', notification.toastId)}
                         >
                           <Check className="h-4 w-4" />
                         </Button>

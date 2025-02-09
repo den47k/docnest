@@ -34,7 +34,7 @@ export function Sidebar() {
         )}
       >
         {/* Application Name */}
-        <div className="text-lg font-bold mx-6 my-4">DockNest</div>
+        <div className="text-lg font-bold mx-6 my-4">DocNest</div>
 
         {/* Create New Document Button */}
         <div className='flex items-center justify-center'>
