@@ -1,26 +1,30 @@
 import { useState, createContext, useContext } from "react";
 
 type ModalContextType = {
-  isCreateTeamOpen: boolean;
-  openCreateTeam: () => void;
-  closeCreateTeam: () => void;
-}
+  openModal: (name: string) => void;
+  closeModal: (name: string) => void;
+  isOpen: (name: string) => boolean;
+};
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export function ModalProvider({ children }: { children: React.ReactNode }) {
-  const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
+  const [modals, setModals] = useState<Record<string, boolean>>({});
 
-  function openCreateTeam() {
-    setIsCreateTeamOpen(true);
+  function openModal(name: string) {
+    setModals((prev) => ({ ...prev, [name]: true }));
   }
 
-  function closeCreateTeam() {
-    setIsCreateTeamOpen(false);
+  function closeModal(name: string) {
+    setModals((prev) => ({ ...prev, [name]: false }));
+  }
+
+  function isOpen(name: string) {
+    return !!modals[name];
   }
 
   return (
-    <ModalContext.Provider value={{ isCreateTeamOpen, openCreateTeam, closeCreateTeam }}>
+    <ModalContext.Provider value={{ openModal, closeModal, isOpen }}>
       {children}
     </ModalContext.Provider>
   );

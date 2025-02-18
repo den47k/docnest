@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CreateTeam;
+use App\Actions\InviteTeamMember;
+use App\Http\Requests\CreateTeamRequest;
 use Illuminate\Http\Request;
 
 class TeamController extends Controller
@@ -18,9 +20,25 @@ class TeamController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateTeamRequest $request)
     {
-        $team = (new CreateTeam())->execute(auth()->user(), $request->all());
+        $data = $request->validated();
+
+        $teamData = [
+            'name' => $data['teamName'],
+            'description' => $data['teamDescription'],
+        ];
+
+        $team = (new CreateTeam())->execute(auth()->user(), $teamData);
+
+        foreach ($data['invites'] as $invite) {
+            (new InviteTeamMember())->execute(
+                auth()->user(),
+                $team,
+                $invite['email'],
+                $invite['role']
+            );
+        }
 
         return redirect()->route('dashboard');
     }

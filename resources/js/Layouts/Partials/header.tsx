@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
-import { Button } from '@/Components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -9,7 +9,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/Components/ui/command';
+} from '@/components/ui/command';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,19 +17,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
-import { Input } from '@/Components/ui/input';
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/Components/ui/popover';
-import { useModal } from '@/contexts/ModalContext';
-import { useSidebarContext } from '@/contexts/SidebarContext';
+} from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, Check, ChevronsUpDown, Menu, Search, X } from 'lucide-react';
-import { TeamInvitation } from '../AuthenticatedLayoutProto';
+import { TeamInvitation } from '../AuthenticatedLayout';
+import { SidebarTrigger } from './Sidebar';
+import { CreateTeamModalTrigger } from '@/components/common/CreateTeamModal';
 
 const teams = [
   { value: 'personal', label: 'Personal' },
@@ -42,30 +42,19 @@ type HeaderProps = {
   onInvitationAction: (invitation: TeamInvitation, action: 'accept' | 'deny', toastId?: string) => void;
 };
 
-export function Header({ notifications, onInvitationAction }: HeaderProps) {
+export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
   const user = usePage().props.auth.user;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [value, setValue] = useState('acme');
 
-  const { setSidebarOpen } = useSidebarContext();
-  const { openCreateTeam } = useModal();
+  console.log(notifications);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 w-full items-center justify-between px-4">
         {/* Left Section */}
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            onClick={setSidebarOpen}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <span className="text-lg font-bold">DocNest</span>
-        </div>
+        <SidebarTrigger />
 
         {/* Search Bar */}
         <div className="max-w-[500px] flex-1 px-6">
@@ -154,7 +143,6 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
                   notifications.map((notification) => (
                     <div
                       key={notification.invitation_id}
-                      // className="px-3 py-2 last:border-none"
                       className="relative flex justify-between cursor-default select-none items-center gap-2 rounded-sm px-3 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
                     >
                       <div className="flex flex-col items-start justify-center">
@@ -169,7 +157,10 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => onInvitationAction(notification, 'deny', notification.toastId)}
+                          onClick={() => {
+                            console.log(notification);
+                            onInvitationAction(notification, 'deny', notification.toastId)
+                          }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -218,11 +209,11 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
               </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>
-                <div onClick={openCreateTeam}>New Team</div>
+                <CreateTeamModalTrigger />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href={route('logout')} method="post" as="button">
+                <Link className='flex h-full w-full' href={route('logout')} method="post" as="button">
                   Log out
                 </Link>
               </DropdownMenuItem>
@@ -232,4 +223,4 @@ export function Header({ notifications, onInvitationAction }: HeaderProps) {
       </div>
     </header>
   );
-}
+};

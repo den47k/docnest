@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DocumentController;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\TeamInvitation;
@@ -11,7 +12,7 @@ use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
 
 Route::get('/', function () {
-    // dd(TeamInvitation::find(3)->inviter);
+    // dd(auth()->user()->teamInvitationNotifications()->toSql());
     return Inertia::render('Dashboard', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -20,9 +21,14 @@ Route::get('/', function () {
     ]);
 })->middleware('auth')->name('dashboard');
 
+Route::get('/test', function () {
+    return Inertia::render('DocumentEditor/DocumentEditor');
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::resource('teams', TeamController::class)->except('index', 'show');
+    Route::resource('documents', DocumentController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

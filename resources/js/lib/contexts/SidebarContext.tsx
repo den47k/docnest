@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
 type SidebarProviderProps = {
   children: ReactNode;
@@ -6,13 +6,12 @@ type SidebarProviderProps = {
 
 type SidebarContextType = {
   isSidebarOpen: boolean;
-  setSidebarOpen: () => void;
-  setSidebarClose: () => void;
+  toggleSidebar: () => void;
 };
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
 
-export function useSidebarContext() {
+export function useSidebar() {
   const value = useContext(SidebarContext);
 
   if (value == null) throw Error("Cannot use outside of SidebarProvider");
@@ -23,21 +22,21 @@ export function useSidebarContext() {
 export function SidebarProvider({ children }: SidebarProviderProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  function setSidebarOpen() {
-    setIsSidebarOpen(true);
-  }
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, [setIsSidebarOpen]);
 
-  function setSidebarClose() {
-    setIsSidebarOpen(false);
-  }
+  const contextValue = useMemo<SidebarContextType>(
+    () => ({
+      isSidebarOpen,
+      toggleSidebar,
+    }),
+    [isSidebarOpen, toggleSidebar]
+  );
 
   return (
     <SidebarContext.Provider
-      value={{
-        isSidebarOpen,
-        setSidebarOpen,
-        setSidebarClose,
-      }}
+      value={contextValue}
     >
       {children}
     </SidebarContext.Provider>

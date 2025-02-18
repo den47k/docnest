@@ -15,7 +15,7 @@ class TeamInvitationController extends Controller
             ->get()
             ->map(function ($notification) {
                 return [
-                    'id' => $notification->id,
+                    'invitation_id' => $notification->id,
                     'email' => $notification->email,
                     'team_id' => $notification->team->id,
                     'team_name' => $notification->team->name,

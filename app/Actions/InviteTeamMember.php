@@ -49,7 +49,7 @@ class InviteTeamMember
     {
         return array_filter([
             'email' => ['required', 'email', Rule::unique('team_invitations')->where('team_id', $team->id)],
-            'role' => ['nullable', Rule::enum(TeamRole::class)],
+            'role' => ['required', Rule::enum(TeamRole::class)],
         ]);
     }
 

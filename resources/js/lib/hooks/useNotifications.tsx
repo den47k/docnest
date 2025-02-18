@@ -1,51 +1,20 @@
-import { CreateTeamModal } from '@/Components/CreateTeamModal';
-import { Toaster } from '@/Components/ui/toaster';
-import { ModalProvider } from '@/contexts/ModalContext';
-import { SidebarProvider } from '@/contexts/SidebarContext';
-import { useToast } from '@/hooks/use-toast';
-import { usePage } from '@inertiajs/react';
-import { ToastAction } from '@radix-ui/react-toast';
-import axios from 'axios';
-import { ReactNode, useEffect, useState } from 'react';
-import { Header } from './Partials/header';
-import { Sidebar } from './Partials/sidebar';
+import { useEffect, useState } from "react"
+import axios from "axios";
+import { TeamInvitation } from "@/layouts/AuthenticatedLayout";
+import { ToastAction } from "@radix-ui/react-toast";
 
 declare const window: any;
 
-export type TeamInvitation = {
-  invitation_id: string;
-  team_id: number;
-  team_name: string;
-  inviter_id: number;
-  inviter_name: string;
-  inviter_email: string;
-  email: string;
-  message: string;
-  toastId?: string;
-};
-
-type AuthenticatedLayoutProps = {
-  children: ReactNode;
-};
-
-export default function AuthenticatedLayout({
-  children,
-}: AuthenticatedLayoutProps) {
-  const user = usePage().props.auth.user;
+export const useNotifications = (userId: number, toast: any, dismiss: any) => {
   const [notifications, setNotifications] = useState<TeamInvitation[]>([]);
-  const [notificationQueue, setNotificationQueue] = useState<TeamInvitation[]>(
-    [],
-  );
-  const [currentNotification, setCurrentNotification] =
-    useState<TeamInvitation | null>(null);
-  const { toast, dismiss } = useToast();
+  const [notificationQueue, setNotificationQueue] = useState<TeamInvitation[]>([]);
+  const [currentNotification, setCurrentNotification] = useState<TeamInvitation | null>(null);
 
   useEffect(() => {
     axios
       .get(route('teams.invitations.index'))
       .then((response) => {
         if (Array.isArray(response.data)) {
-          console.log(response.data);
           setNotifications(response.data);
         }
       })
@@ -54,12 +23,12 @@ export default function AuthenticatedLayout({
       });
   }, []);
 
+
   useEffect(() => {
     if (window?.Echo) {
-      const channel = window.Echo.private(`App.Models.User.${user.id}`);
+      const channel = window.Echo.private(`App.Models.User.${userId}`);
 
-      channel.notification((notification: TeamInvitation) => {
-        console.log('New notification:', notification);
+      channel.notification((notification: any) => {
         setNotificationQueue((prev) => [...prev, notification]);
         setNotifications((prev) => [...prev, notification]);
       });
@@ -68,7 +37,7 @@ export default function AuthenticatedLayout({
         channel.unsubscribe();
       };
     }
-  }, [user.id]);
+  }, [userId]);
 
   useEffect(() => {
     if (!currentNotification && notificationQueue.length > 0) {
@@ -153,20 +122,11 @@ export default function AuthenticatedLayout({
     }
   };
 
-  return (
-    <SidebarProvider>
-      <ModalProvider>
-        <div className="flex max-h-screen flex-col">
-          <Header
-            notifications={notifications}
-            onInvitationAction={handleInvitationAction}
-          />
-          <Sidebar />
-          {children}
-          <CreateTeamModal />
-          <Toaster />
-        </div>
-      </ModalProvider>
-    </SidebarProvider>
-  );
+  return {
+    notifications,
+    notificationQueue,
+    currentNotification,
+    handleInvitationAction,
+    handleNotificationClose,
+  };
 }

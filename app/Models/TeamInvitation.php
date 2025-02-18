@@ -10,9 +10,6 @@ class TeamInvitation extends Model
 {
     use HasUuids;
 
-    // protected $keyType = 'string';
-    // public $incrementing = false;
-
     protected $fillable = [
         'team_id',
         'email',
