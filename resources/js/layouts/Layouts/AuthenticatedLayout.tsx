@@ -3,8 +3,8 @@ import { useToast } from '@/lib/hooks/use-toast';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { usePage } from '@inertiajs/react';
 import { ReactNode } from 'react';
-import { Header } from './partials/Header';
-import { Sidebar } from './partials/Sidebar';
+import { Header } from '../partials/Header';
+import { Sidebar } from '../partials/Sidebar';
 
 declare const window: any;
 

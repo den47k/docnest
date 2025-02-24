@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, Check, ChevronsUpDown, Search, X } from 'lucide-react';
 import { TeamInvitation } from '../AuthenticatedLayout';
-import { SidebarTrigger } from './Sidebar';
+import { SidebarTrigger } from './sidebar';
 import { CreateTeamModalTrigger } from '@/components/common/CreateTeamModal';
 
 const teams = [
