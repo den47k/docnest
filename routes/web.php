@@ -1,9 +1,7 @@
 <?php
 
 use App\Http\Controllers\DocumentController;
-use App\Models\User;
 use Inertia\Inertia;
-use App\Models\TeamInvitation;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\TeamController;
@@ -11,15 +9,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
 
-Route::get('/', function () {
-    // dd(auth()->user()->teamInvitationNotifications()->toSql());
-    return Inertia::render('Dashboard', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-})->middleware('auth')->name('dashboard');
+// Route::get('/', function () {
+//     return Inertia::render('Dashboard', [
+//         'canLogin' => Route::has('login'),
+//         'canRegister' => Route::has('register'),
+//         'laravelVersion' => Application::VERSION,
+//         'phpVersion' => PHP_VERSION,
+//     ]);
+// })->middleware('auth')->name('dashboard');
 
 Route::get('/test', function () {
     return Inertia::render('DocumentEditor/DocumentEditor');
@@ -28,7 +25,9 @@ Route::get('/test', function () {
 
 Route::middleware('auth')->group(function () {
     Route::resource('teams', TeamController::class)->except('index', 'show');
-    Route::resource('documents', DocumentController::class);
+
+    Route::get('/', [DocumentController::class, 'index'])->name('index');
+    Route::resource('documents', DocumentController::class)->except('index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -65,7 +65,11 @@ export function CreateTeamModal() {
   });
 
   const onSubmit: SubmitHandler<FormInput> = (data) => {
-    router.post(route('teams.store'), data);
+    router.post(route('teams.store'), data, {
+      onSuccess: () => {
+        handleClose();
+      }
+    });
   };
 
   const handleClose = () => {
