@@ -3,21 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class DocumentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        $teamId = session("selected_team_{$user->id}", 'personal');
+
+        $documents = $teamId === 'personal'
+            ? Document::whereNull('team_id')->where('user_id', $user->id)->get()
+            : Document::where('team_id', $teamId)->get();
+
+            $invitations = $user->teamInvitationNotifications()
+            ->with('team:id,name', 'inviter:id,name,email')
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'invitation_id' => $notification->id,
+                    'email' => $notification->email,
+                    'team_id' => $notification->team->id,
+                    'team_name' => $notification->team->name,
+                    'inviter_id' => $notification->inviter->id,
+                    'inviter_name' => $notification->inviter->name,
+                    'inviter_email' => $notification->inviter->email,
+                    'message' => 'You have been invited to join the team.',
+                ];
+            });
+
         return inertia('Dashboard', [
-            'documents' => Document::where('user_id', auth()->id())->get(),
-            'laravelVersion' => Application::VERSION,
-            'phpVersion' => PHP_VERSION,
+            'invitations' => $invitations,
+            'documents' => $documents,
         ]);
     }
 

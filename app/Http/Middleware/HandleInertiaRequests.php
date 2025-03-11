@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -29,19 +31,31 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        if (!$user = $request->user()) {
-            return [];
-        }
+        if (!$user = $request->user()) return [];
+
+        $teamId = session("selected_team_{$user->id}");
+        $selectedTeam = $teamId
+            ? $user->allTeams()->firstWhere('teams.id', $teamId)
+            : null;
 
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => array_merge(
-                    $user->toArray(),
-                    [
-                        'all_teams' => $user->allTeams()->get()->toArray(),
-                    ],
-                )
+                'user' => [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'teams' => $request->user()
+                        ->allTeams()
+                        ->select([
+                            'teams.id as id',
+                            'teams.owner_id',
+                            'teams.name',
+                            'teams.description',
+                        ])
+                        ->get(),
+                    'selectedTeam' => $selectedTeam,
+                ],
             ],
         ];
     }

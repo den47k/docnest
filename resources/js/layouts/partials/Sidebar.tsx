@@ -1,6 +1,6 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/SidebarContext';
-import { FileText, Plus, Settings, Trash2, Users, Menu } from 'lucide-react';
+import { FileText, Menu, Plus, Settings, Trash2, Users } from 'lucide-react';
 import React, { ElementType, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
@@ -39,7 +39,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
           {...props}
         >
           {/* Application Name */}
-          <div className="text-lg font-bold mx-6 my-4">DocNest</div>
+          <div className="mx-6 my-4 text-lg font-bold">DocNest</div>
 
           {/* Create New Document Button */}
           <div className="px-4 pb-4">
@@ -90,24 +90,19 @@ function SidebarItem({ Icon, title, url, isActive = false }: SidebarItemProps) {
   );
 }
 
-
 const SidebarTrigger = () => {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="flex items-center space-x-4">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="mr-2"
-        onClick={toggleSidebar}
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-      <span className="text-lg font-bold">DocNest</span>
-    </div>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="mr-2"
+      onClick={toggleSidebar}
+    >
+      <Menu className="h-5 w-5" />
+    </Button>
   );
-}
+};
 
-
-export {Sidebar, SidebarTrigger};
+export { Sidebar, SidebarTrigger };

@@ -18,9 +18,10 @@ class CreateTeam
         $team = $user->ownedTeams()->create([
             'name' => $data['name'],
             'description' => $data['description'],
+            'owner_id' => $user->id,
         ]);
 
-        $team->users()->attach(
+        $team->members()->attach(
             $user,
             ['role' => 'owner']
         );

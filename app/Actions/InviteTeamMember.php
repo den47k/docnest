@@ -11,10 +11,9 @@ use App\Notifications\TeamInvitationNotification;
 
 class InviteTeamMember
 {
-    public function execute(User $user, Team $team, string $email, string $role = null)
+    public function execute(User $user, Team $team, string $email, string $role)
     {
         $this->validate($team, $email, $role);
-
         $userToInvite = User::where('email', $email)->first();
 
         $invitation = $team->teamInvitations()->create([

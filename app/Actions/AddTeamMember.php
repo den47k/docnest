@@ -17,7 +17,7 @@ class AddTeamMember
     {
         $this->validate($user, $invitation);
 
-        $invitation->team->users()->attach($invitation->user_id, ['role' => $invitation->role ?? TeamRole::Guest]);
+        $invitation->team->members()->attach($invitation->user_id, ['role' => $invitation->role ?? TeamRole::Guest]);
         $invitation->delete();
     }
 

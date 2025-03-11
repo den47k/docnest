@@ -1,11 +1,12 @@
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Plus, FileText, Clock,  } from 'lucide-react';
 
 declare const window: any;
 
 export default function Dashboard({ documents }: any) {
+  // const { selectedTeam } = usePage().props.auth.user;
   const recentDocs = [
     { id: 1, title: "Project Proposal", lastModified: "Modified Dec 12, 2023" },
     { id: 2, title: "Meeting Notes", lastModified: "Modified Dec 10, 2023" },
@@ -14,19 +15,16 @@ export default function Dashboard({ documents }: any) {
     { id: 5, title: "Team Updates", lastModified: "Modified Dec 1, 2023" },
   ]
 
-  console.log(documents);
+  // console.log("Documets: " + JSON.stringify(documents, null, 2));
+  // console.log(selectedTeam);
 
   return (
     <AuthenticatedLayout>
       <main className="container mx-auto py-6 px-4 space-y-8 max-w-[1200px]">
         <div className="flex items-center gap-4">
-          <Button className="gap-2 rounded-full px-6 bg-white hover:bg-gray-50 text-black border shadow-sm" size="lg">
+          <Button className="gap-2 rounded-full px-6 border shadow-sm" variant={'ghost'}>
             <Plus className="h-5 w-5" />
             New
-          </Button>
-          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-            <FileText className="h-5 w-5" />
-            Templates
           </Button>
         </div>
 

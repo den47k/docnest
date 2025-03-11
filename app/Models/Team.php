@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Team extends Model
 {
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'owner_id', 'description'];
 
-    public function users()
+    public function members()
     {
         return $this->belongsToMany(User::class)
             ->withPivot('role')
@@ -17,7 +17,7 @@ class Team extends Model
     }
 
     public function owner() {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function teamInvitations() {
@@ -29,6 +29,6 @@ class Team extends Model
     // functions
 
     public function hasUserWithEmail(string $email) {
-        return $this->users->contains('email', $email);
+        return $this->members->contains('email', $email);
     }
 }

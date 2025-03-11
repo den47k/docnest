@@ -40,8 +40,27 @@ class TeamController extends Controller
             );
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('index');
     }
+
+    public function updateSelectedTeam(Request $request)
+    {
+        $user = $request->user();
+        $teamId = $request->input('team_id');
+
+        if ($teamId !== 'personal') {
+            $selectedTeam = $user->allTeams()->firstWhere('teams.id', $teamId);
+            if (!$selectedTeam) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+            session(["selected_team_{$user->id}" => $selectedTeam->id]);
+        } else {
+            session(["selected_team_{$user->id}" => null]);
+        }
+
+        return response()->json(['currentTeam' => 'Team updated successfully']);
+    }
+
 
     /**
      * Display the specified resource.
@@ -62,10 +81,7 @@ class TeamController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-
-    }
+    public function update(Request $request, string $id) {}
 
     /**
      * Remove the specified resource from storage.

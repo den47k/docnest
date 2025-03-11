@@ -1,27 +1,19 @@
 import { useEffect, useState } from "react"
 import axios from "axios";
-import { TeamInvitation } from "@/layouts/AuthenticatedLayout";
+import { TeamInvitation } from "@/types";
 import { ToastAction } from "@radix-ui/react-toast";
 
 declare const window: any;
 
-export const useNotifications = (userId: number, toast: any, dismiss: any) => {
-  const [notifications, setNotifications] = useState<TeamInvitation[]>([]);
+export const useNotifications = (
+  userId: number,
+  toast: any,
+  dismiss: any,
+  initialInvitations?: TeamInvitation[]
+) => {
+  const [notifications, setNotifications] = useState<TeamInvitation[]>(initialInvitations || []);
   const [notificationQueue, setNotificationQueue] = useState<TeamInvitation[]>([]);
-  const [currentNotification, setCurrentNotification] = useState<TeamInvitation | null>(null);
-
-  useEffect(() => {
-    axios
-      .get(route('teams.invitations.index'))
-      .then((response) => {
-        if (Array.isArray(response.data)) {
-          setNotifications(response.data);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching notifications:', error);
-      });
-  }, []);
+  console.log('Notifications state:', notifications);
 
 
   useEffect(() => {
@@ -39,24 +31,23 @@ export const useNotifications = (userId: number, toast: any, dismiss: any) => {
     }
   }, [userId]);
 
-  useEffect(() => {
-    if (!currentNotification && notificationQueue.length > 0) {
-      const nextNotification = notificationQueue[0];
-      setCurrentNotification(nextNotification);
-      setNotificationQueue((prev) => prev.slice(1));
 
-      const toastId = toast({
-        title: 'Team Invitation',
-        description: `${nextNotification.inviter_name} invited you to join ${nextNotification.team_name}.`,
-        duration: 6000,
-        action: (
-          <>
+  useEffect(() => {
+    if (notificationQueue.length > 0) {
+      setNotificationQueue([]);
+
+      notificationQueue.forEach((notification) => {
+        const toastId = toast({
+          title: 'Team Invitation',
+          description: `${notification.inviter_name} invited you to join ${notification.team_name}.`,
+          duration: 20000,
+          action: (
+            <>
             <ToastAction
               className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               altText="Deny"
               onClick={() => {
-                handleInvitationAction(nextNotification, 'deny', toastId.id);
-                handleNotificationClose();
+                handleInvitationAction(notification, 'deny', toastId.id);
               }}
             >
               Deny
@@ -65,23 +56,20 @@ export const useNotifications = (userId: number, toast: any, dismiss: any) => {
               className="inline-flex h-8 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               altText="Accept"
               onClick={() => {
-                handleInvitationAction(nextNotification, 'accept', toastId.id);
-                handleNotificationClose();
+                handleInvitationAction(notification, 'accept', toastId.id);
               }}
             >
               Accept
             </ToastAction>
           </>
-        ),
+          ),
+        });
+
+        notification.toastId = toastId.id;
       });
-
-      nextNotification.toastId = toastId.id;
     }
-  }, [notificationQueue, currentNotification, toast]);
+  }, [notificationQueue, toast]);
 
-  const handleNotificationClose = () => {
-    setCurrentNotification(null);
-  };
 
   const handleInvitationAction = async (
     invitation: TeamInvitation,
@@ -102,13 +90,7 @@ export const useNotifications = (userId: number, toast: any, dismiss: any) => {
         ? axios.post(endpoint)
         : axios.delete(endpoint));
 
-      setNotifications((prev) =>
-        prev.filter((n) => n.invitation_id !== invitation.invitation_id),
-      );
-
-      if (currentNotification?.invitation_id === invitation.invitation_id) {
-        setCurrentNotification(null);
-      }
+      setNotifications((prev) => [...prev.filter((n) => n.invitation_id !== invitation.invitation_id)]);
 
       if (toastId) {
         dismiss(toastId)
@@ -122,11 +104,12 @@ export const useNotifications = (userId: number, toast: any, dismiss: any) => {
     }
   };
 
+  useEffect(() => {
+    console.log(notifications);
+  }, [notifications]);
+
   return {
     notifications,
-    notificationQueue,
-    currentNotification,
     handleInvitationAction,
-    handleNotificationClose,
   };
 }

@@ -48,13 +48,12 @@ class User extends Authenticatable
 
     public function ownedTeams()
     {
-        return $this->hasMany(Team::class, 'user_id');
+        return $this->hasMany(Team::class, 'owner_id');
     }
 
     public function allTeams() {
         return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
-            ->withPivot('role')
-            ->withTimestamps();
+            ->withPivot('role');
     }
 
     public function teamInvitationNotifications() {

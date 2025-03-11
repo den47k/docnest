@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\DocumentController;
+use App\Models\Team;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
 
@@ -25,6 +26,7 @@ Route::get('/test', function () {
 
 Route::middleware('auth')->group(function () {
     Route::resource('teams', TeamController::class)->except('index', 'show');
+    Route::post('/teams/select', [TeamController::class, 'updateSelectedTeam'])->name('teams.select');
 
     Route::get('/', [DocumentController::class, 'index'])->name('index');
     Route::resource('documents', DocumentController::class)->except('index');

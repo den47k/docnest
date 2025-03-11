@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { CreateTeamModalTrigger } from '@/components/common/CreateTeamModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,37 +25,57 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useToast } from '@/lib/hooks/use-toast';
+import { useNotifications } from '@/lib/hooks/useNotifications';
 import { cn } from '@/lib/utils';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import { Bell, Check, ChevronsUpDown, Search, X } from 'lucide-react';
-import { TeamInvitation } from '../AuthenticatedLayout';
 import { SidebarTrigger } from './Sidebar';
-import { CreateTeamModalTrigger } from '@/components/common/CreateTeamModal';
+import { TeamInvitation } from '@/types';
+import { PageProps } from '@/types';
 
-const teams = [
-  { value: 'personal', label: 'Personal' },
-  { value: 'acme', label: 'Acme Inc.' },
-  { value: 'monsters', label: 'Monsters Inc.' },
-];
+export const Header = () => {
+  const { auth, invitations } = usePage<PageProps>().props;
+  const { teams, selectedTeam, ...user } = auth.user;
+  const { dismiss, toast } = useToast();
 
-type HeaderProps = {
-  notifications: TeamInvitation[];
-  onInvitationAction: (invitation: TeamInvitation, action: 'accept' | 'deny', toastId?: string) => void;
-};
-
-export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
-  const user = usePage().props.auth.user;
+  const { notifications, handleInvitationAction } = useNotifications(
+    user.id,
+    toast,
+    dismiss,
+    invitations
+  );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [value, setValue] = useState('acme');
+  const [currentTeam, setCurrentTeam] = useState(selectedTeam || null);
 
-  console.log(notifications);
+  const handleTeamSelect = async (teamId: string) => {
+    if (currentTeam && currentTeam.id === teamId) return;
+
+    const selected = teams.find(team => team.id === teamId) || null;
+    setCurrentTeam(selected);
+
+    try {
+      await axios.post(route('teams.select'), { team_id: teamId });
+      router.reload();
+    } catch (error) {
+      console.error('Failed to update team:', error);
+    }
+  };
+
+  useEffect(() => {
+    console.log('Notifications: ' + JSON.stringify(invitations, null, 2));
+  }, [invitations]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 w-full items-center justify-between px-4">
         {/* Left Section */}
-        <SidebarTrigger />
+        <div className="flex items-center space-x-4">
+          <SidebarTrigger />
+          <span className="text-lg font-bold cursor-pointer select-none">DocNest</span>
+        </div>
 
         {/* Search Bar */}
         <div className="max-w-[500px] flex-1 px-6">
@@ -81,9 +102,7 @@ export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
                 aria-expanded={isPopoverOpen}
                 className="w-[150px] justify-between rounded-full"
               >
-                {value
-                  ? teams.find((team) => team.value === value)?.label
-                  : 'Select team...'}
+                {currentTeam ? currentTeam.name : 'Personal'}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -95,20 +114,22 @@ export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
                   <CommandGroup>
                     {teams.map((team) => (
                       <CommandItem
-                        key={team.value}
-                        value={team.value}
-                        onSelect={(currentValue) => {
-                          setValue(currentValue === value ? '' : currentValue);
+                        key={team.id}
+                        value={team.id}
+                        onSelect={() => {
+                          handleTeamSelect(team.id);
                           setIsPopoverOpen(false);
                         }}
                       >
                         <Check
                           className={cn(
                             'mr-2 h-4 w-4',
-                            value === team.value ? 'opacity-100' : 'opacity-0',
+                            currentTeam?.id === team.id
+                              ? 'opacity-100'
+                              : 'opacity-0',
                           )}
                         />
-                        {team.label}
+                        {team.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -143,7 +164,7 @@ export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
                   notifications.map((notification) => (
                     <div
                       key={notification.invitation_id}
-                      className="relative flex justify-between cursor-default select-none items-center gap-2 rounded-sm px-3 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+                      className="relative flex cursor-default select-none items-center justify-between gap-2 rounded-sm px-3 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
                     >
                       <div className="flex flex-col items-start justify-center">
                         <p className="text-xs font-medium">
@@ -159,14 +180,24 @@ export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
                           size="icon"
                           onClick={() => {
                             console.log(notification);
-                            onInvitationAction(notification, 'deny', notification.toastId)
+                            handleInvitationAction(
+                              notification,
+                              'deny',
+                              notification.toastId,
+                            );
                           }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                         <Button
                           size="icon"
-                          onClick={() => onInvitationAction(notification, 'accept', notification.toastId)}
+                          onClick={() =>
+                            handleInvitationAction(
+                              notification,
+                              'accept',
+                              notification.toastId,
+                            )
+                          }
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -213,7 +244,12 @@ export const  Header = ({ notifications, onInvitationAction }: HeaderProps) => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link className='flex h-full w-full' href={route('logout')} method="post" as="button">
+                <Link
+                  className="flex h-full w-full"
+                  href={route('logout')}
+                  method="post"
+                  as="button"
+                >
                   Log out
                 </Link>
               </DropdownMenuItem>
