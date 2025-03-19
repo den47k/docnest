@@ -21,15 +21,18 @@ use App\Http\Controllers\TeamInvitationController;
 
 Route::get('/test', function () {
     return Inertia::render('DocumentEditor/DocumentEditor');
-});
+})->name('test');
 
 
 Route::middleware('auth')->group(function () {
     Route::resource('teams', TeamController::class)->except('index', 'show');
-    Route::post('/teams/select', [TeamController::class, 'updateSelectedTeam'])->name('teams.select');
+    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/teams/current', [TeamController::class, 'getCurrentTeam'])->name('teams.current');
+    Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
 
     Route::get('/', [DocumentController::class, 'index'])->name('index');
     Route::resource('documents', DocumentController::class)->except('index');
+    Route::get('/documents', [DocumentController::class, 'fetchDocuments'])->name('documents.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

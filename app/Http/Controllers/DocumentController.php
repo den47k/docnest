@@ -12,32 +12,20 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
+        return inertia('Dashboard');
+    }
+
+    public function fetchDocuments(Request $request)
+    {
         $user = $request->user();
-        $teamId = session("selected_team_{$user->id}", 'personal');
+        $teamId = $request->input('team_id', 'personal');
 
-        $documents = $teamId === 'personal'
-            ? Document::whereNull('team_id')->where('user_id', $user->id)->get()
-            : Document::where('team_id', $teamId)->get();
+        $query = $teamId === 'personal'
+            ? Document::whereNull('team_id')->where('user_id', $user->id)
+            : Document::where('team_id', $teamId);
 
-            $invitations = $user->teamInvitationNotifications()
-            ->with('team:id,name', 'inviter:id,name,email')
-            ->get()
-            ->map(function ($notification) {
-                return [
-                    'invitation_id' => $notification->id,
-                    'email' => $notification->email,
-                    'team_id' => $notification->team->id,
-                    'team_name' => $notification->team->name,
-                    'inviter_id' => $notification->inviter->id,
-                    'inviter_name' => $notification->inviter->name,
-                    'inviter_email' => $notification->inviter->email,
-                    'message' => 'You have been invited to join the team.',
-                ];
-            });
-
-        return inertia('Dashboard', [
-            'invitations' => $invitations,
-            'documents' => $documents,
+        return response()->json([
+            'data' => $query->get()
         ]);
     }
 

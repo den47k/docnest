@@ -42,9 +42,9 @@ export default function Editor() {
 
   return (
     <>
-      <button onClick={() => router.get(route('index'))}>Home</button>
+      {/* <button onClick={() => router.get(route('index'))}>Home</button> */}
       <Toolbar editor={editor} />
-      <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:overflow-visible print:bg-white print:p-0">
+      <div className="size-full overflow-x-auto bg-gray-50 px-4 print:overflow-visible print:bg-white print:p-0">
         <div className="mx-auto flex w-[816px] min-w-max flex-col justify-center py-4 print:w-full print:min-w-0 print:py-0">
           <EditorContent editor={editor} />
         </div>

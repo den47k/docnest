@@ -34,7 +34,7 @@ class HandleInertiaRequests extends Middleware
         if (!$user = $request->user()) return [];
 
         $teamId = session("selected_team_{$user->id}");
-        $selectedTeam = $teamId
+        $currentTeam = $teamId
             ? $user->allTeams()->firstWhere('teams.id', $teamId)
             : null;
 
@@ -42,19 +42,22 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'teams' => $request->user()
-                        ->allTeams()
-                        ->select([
-                            'teams.id as id',
-                            'teams.owner_id',
-                            'teams.name',
-                            'teams.description',
-                        ])
-                        ->get(),
-                    'selectedTeam' => $selectedTeam,
+                    ...$user->only('id', 'name', 'email'),
+                    'invitations' => fn () => $user ? $user->teamInvitationNotifications()
+                    ->with('team:id,name', 'inviter:id,name,email')
+                    ->get()
+                    ->map(function ($notification) {
+                        return [
+                            'invitation_id' => $notification->id,
+                            'email' => $notification->email,
+                            'team_id' => $notification->team->id,
+                            'team_name' => $notification->team->name,
+                            'inviter_id' => $notification->inviter->id,
+                            'inviter_name' => $notification->inviter->name,
+                            'inviter_email' => $notification->inviter->email,
+                            'message' => 'You have been invited to join the team.',
+                        ];
+                    }) : [],
                 ],
             ],
         ];

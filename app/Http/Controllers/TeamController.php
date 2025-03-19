@@ -3,12 +3,64 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CreateTeam;
-use App\Actions\InviteTeamMember;
-use App\Http\Requests\CreateTeamRequest;
 use Illuminate\Http\Request;
+use App\Actions\InviteTeamMember;
+use Illuminate\Support\Facades\Log;
+use App\Http\Requests\CreateTeamRequest;
+use App\Models\Team;
+use Illuminate\Support\Facades\Cache;
 
 class TeamController extends Controller
 {
+    public function index(Request $request)
+    {
+        return response()->json([
+            'teams' => $request->user()->allTeams()
+                ->get()
+                ->map(fn($team) => $team->only('id', 'name', 'description', 'owner_id'))
+        ]);
+    }
+
+
+    public function getCurrentTeam(Request $request)
+    {
+        $user = $request->user();
+        $teamId = Cache::get("selected_team_{$user->id}", 'personal');
+
+        if ($teamId !== 'personal') {
+            $team = $user->allTeams()->firstWhere('teams.id', $teamId);
+
+            if (!$team) {
+                Cache::put("selected_team_{$user->id}", 'personal', now()->addDays(1));
+                return response()->json(['currentTeam' => ['id' => 'personal']]);
+            }
+
+            return response()->json(['currentTeam' => $team->only('id', 'name')]);
+        }
+
+        return response()->json(['currentTeam' => ['id' => 'personal']]);
+    }
+
+
+    public function updateCurrentTeam(Request $request)
+    {
+        $user = $request->user();
+        $teamId = $request->input('team_id') ?? 'personal';
+
+        if ($teamId === 'personal') {
+            Cache::put("selected_team_{$user->id}", 'personal', now()->addDays(1));
+            return response()->json(['currentTeam' => ['id' => 'personal']]);
+        }
+
+        $team = $user->allTeams()->firstWhere('teams.id', $teamId);
+        if (!$team) {
+            return response()->json(['message' => 'Unauthorized team selection'], 403);
+        }
+
+        Cache::put("selected_team_{$user->id}", $team->id, now()->addDays(1));
+        return response()->json(['currentTeam' => $team->only('id', 'name')]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -41,24 +93,6 @@ class TeamController extends Controller
         }
 
         return redirect()->route('index');
-    }
-
-    public function updateSelectedTeam(Request $request)
-    {
-        $user = $request->user();
-        $teamId = $request->input('team_id');
-
-        if ($teamId !== 'personal') {
-            $selectedTeam = $user->allTeams()->firstWhere('teams.id', $teamId);
-            if (!$selectedTeam) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
-            session(["selected_team_{$user->id}" => $selectedTeam->id]);
-        } else {
-            session(["selected_team_{$user->id}" => null]);
-        }
-
-        return response()->json(['currentTeam' => 'Team updated successfully']);
     }
 
 

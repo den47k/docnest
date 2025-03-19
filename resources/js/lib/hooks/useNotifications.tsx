@@ -13,7 +13,6 @@ export const useNotifications = (
 ) => {
   const [notifications, setNotifications] = useState<TeamInvitation[]>(initialInvitations || []);
   const [notificationQueue, setNotificationQueue] = useState<TeamInvitation[]>([]);
-  console.log('Notifications state:', notifications);
 
 
   useEffect(() => {
@@ -103,10 +102,6 @@ export const useNotifications = (
       );
     }
   };
-
-  useEffect(() => {
-    console.log(notifications);
-  }, [notifications]);
 
   return {
     notifications,
