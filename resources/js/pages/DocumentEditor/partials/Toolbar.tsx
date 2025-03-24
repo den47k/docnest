@@ -1,18 +1,25 @@
+import { FontFamilySelector } from '@/components/features/document-editor/FontFamilySelector';
+import { FontSizeSelector } from '@/components/features/document-editor/FontSizeSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { Link } from '@inertiajs/react';
 import { Editor, useEditorState } from '@tiptap/react';
 import {
+  AlignCenterIcon,
+  AlignJustifyIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
   BoldIcon,
   FileText,
   ItalicIcon,
+  ListIcon,
+  ListOrderedIcon,
   ListTodoIcon,
   LucideIcon,
-  MessageSquarePlusIcon,
   PrinterIcon,
   Redo2Icon,
-  RemoveFormattingIcon,
   Share2,
   UnderlineIcon,
   Undo2Icon,
@@ -29,8 +36,8 @@ function ToolbarButton({ icon: Icon, isActive, onClick }: ToolbarButtonProps) {
     <button
       onClick={onClick}
       className={cn(
-        'flex h-7 min-w-7 items-center justify-center rounded-sm text-sm hover:bg-neutral-200/80',
-        isActive && 'bg-neutral-200/80',
+        'flex h-7 min-w-7 items-center justify-center rounded-md text-sm hover:bg-accent hover:text-accent-foreground',
+        isActive && 'bg-accent text-accent-foreground',
       )}
     >
       <Icon className="size-4"></Icon>
@@ -41,7 +48,7 @@ function ToolbarButton({ icon: Icon, isActive, onClick }: ToolbarButtonProps) {
 export default function Toolbar({ editor }: { editor: Editor }) {
   const editorState = useEditorState({
     editor,
-    selector: ({ editor }) => ({
+    selector: ({ editor }: { editor: Editor }) => ({
       canUndo: editor.can().undo(),
     }),
   });
@@ -63,11 +70,11 @@ export default function Toolbar({ editor }: { editor: Editor }) {
         icon: Redo2Icon,
         onClick: () => editor.chain().focus().redo().run(),
       },
-      {
-        label: 'Print',
-        icon: PrinterIcon,
-        onClick: () => window.print(),
-      },
+      // {
+      //   label: 'Print',
+      //   icon: PrinterIcon,
+      //   onClick: () => window.print(),
+      // },
     ],
     [
       {
@@ -91,10 +98,42 @@ export default function Toolbar({ editor }: { editor: Editor }) {
     ],
     [
       {
-        label: 'Comment',
-        icon: MessageSquarePlusIcon,
-        onClick: () => console.log('huy'),
-        isActive: false,
+        label: 'Align Left',
+        icon: AlignLeftIcon,
+        onClick: () => editor?.chain().focus().setTextAlign('left').run(),
+        isActive: editor?.isActive({ textAlign: 'left' }),
+      },
+      {
+        label: 'Align Center',
+        icon: AlignCenterIcon,
+        onClick: () => editor?.chain().focus().setTextAlign('center').run(),
+        isActive: editor?.isActive({ textAlign: 'center' }),
+      },
+      {
+        label: 'Align Right',
+        icon: AlignRightIcon,
+        onClick: () => editor?.chain().focus().setTextAlign('right').run(),
+        isActive: editor?.isActive({ textAlign: 'right' }),
+      },
+      {
+        label: 'Align Justify',
+        icon: AlignJustifyIcon,
+        onClick: () => editor?.chain().focus().setTextAlign('justify').run(),
+        isActive: editor?.isActive({ textAlign: 'justify' }),
+      },
+    ],
+    [
+      {
+        label: 'Bullet List',
+        icon: ListIcon,
+        onClick: () => editor?.chain().focus().toggleBulletList().run(),
+        isActive: editor?.isActive('bulletList'),
+      },
+      {
+        label: 'Ordered List',
+        icon: ListOrderedIcon,
+        onClick: () => editor?.chain().focus().toggleOrderedList().run(),
+        isActive: editor?.isActive('orderedList'),
       },
       {
         label: 'List ToDo',
@@ -102,29 +141,29 @@ export default function Toolbar({ editor }: { editor: Editor }) {
         onClick: () => editor?.chain().focus().toggleTaskList().run(),
         isActive: editor?.isActive('taskList'),
       },
-      {
-        label: 'Remove Formatting',
-        icon: RemoveFormattingIcon,
-        onClick: () => editor?.chain().focus().unsetAllMarks().run(),
-      },
     ],
   ];
 
   return (
     <>
       {/* Menu Bar */}
-    <div className="flex items-center justify-between px-4 py-2 border-b">
+      <div className="flex items-center justify-between border-b px-4 py-2">
         <div className="flex items-center">
-          <FileText className="mr-2 h-6 w-6 cursor-pointer" strokeWidth={1.5} />
+          <Link href={route('index')}>
+            <FileText
+              className="mr-2 h-6 w-6 cursor-pointer"
+              strokeWidth={1.5}
+            />
+          </Link>
           <input
             value={'Untitled document'}
             className="flex h-9 w-full border-0 bg-transparent px-3 py-1 text-lg font-medium outline-none placeholder:text-muted-foreground focus:bg-transparent focus:hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
-        <div className="flex space-x-2">
+        <div className="flex space-x-6">
           <Button
-            className="gap-2 rounded-full border px-6 shadow-sm"
+            className="rounded-full border px-6 shadow-sm"
             variant="ghost"
           >
             <Share2 className="h-5 w-5" />
@@ -141,7 +180,7 @@ export default function Toolbar({ editor }: { editor: Editor }) {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center px-4 py-1 border-b bg-muted/30 gap-x-0.5 overflow-x-auto">
+      <div className="flex items-center gap-x-0.5 overflow-x-auto border-b bg-muted/30 px-4 py-1">
         {sections[0].map((item) => (
           <ToolbarButton key={item.label} {...item} />
         ))}
@@ -149,17 +188,12 @@ export default function Toolbar({ editor }: { editor: Editor }) {
           orientation="vertical"
           className="mx-0.5 h-6 bg-neutral-300"
         />
-        {/* ToDo: Font family */}
+        <FontFamilySelector editor={editor} />
         <Separator
           orientation="vertical"
           className="mx-0.5 h-6 bg-neutral-300"
         />
-        {/* ToDo: Heading */}
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        {/* ToDo: Font size */}
+        <FontSizeSelector editor={editor} />
         <Separator
           orientation="vertical"
           className="mx-0.5 h-6 bg-neutral-300"
@@ -167,18 +201,18 @@ export default function Toolbar({ editor }: { editor: Editor }) {
         {sections[1].map((item) => (
           <ToolbarButton key={item.label} {...item} />
         ))}
-        {/* ToDo: Text color */}
-        {/* ToDo: Highlight color */}
         <Separator
           orientation="vertical"
           className="mx-0.5 h-6 bg-neutral-300"
         />
-        {/* ToDo: Link */}
-        {/* ToDo: Image */}
-        {/* ToDo: Align */}
-        {/* ToDo: Line height */}
-        {/* ToDo: List */}
         {sections[2].map((item) => (
+          <ToolbarButton key={item.label} {...item} />
+        ))}
+        <Separator
+          orientation="vertical"
+          className="mx-0.5 h-6 bg-neutral-300"
+        />
+        {sections[3].map((item) => (
           <ToolbarButton key={item.label} {...item} />
         ))}
       </div>

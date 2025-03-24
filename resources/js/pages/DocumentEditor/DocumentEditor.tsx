@@ -1,16 +1,17 @@
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
+import { EditorContent, useEditor } from '@tiptap/react';
+
+import TextAlign from '@tiptap/extension-text-align'
 import TaskItem from '@tiptap/extension-task-item';
 import TaskList from '@tiptap/extension-task-list';
 import Underline from '@tiptap/extension-underline';
-import { EditorContent, useEditor } from '@tiptap/react';
+import FontFamily from '@tiptap/extension-font-family';
 import StarterKit from '@tiptap/starter-kit';
-import ImageResize from 'tiptap-extension-resize-image';
+import TextStyle from '@tiptap/extension-text-style';
+
+import { FontSizeExtension } from '@/extensions/font-size';
+
 import Toolbar from './partials/Toolbar';
 import './styles.css'
-import { router } from '@inertiajs/react';
 
 export default function Editor() {
   const editor = useEditor({
@@ -23,26 +24,27 @@ export default function Editor() {
     },
     extensions: [
       StarterKit,
+      FontSizeExtension,
+      FontFamily,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      TextStyle,
       TaskList,
       TaskItem.configure({
         nested: true,
       }),
-      Table.configure({
-        resizable: true,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      ImageResize,
       Underline,
     ],
+    onUpdate: ({ editor }) => {
+      console.log(editor.getJSON());
+    },
   });
 
   if (!editor) return;
 
   return (
     <>
-      {/* <button onClick={() => router.get(route('index'))}>Home</button> */}
       <Toolbar editor={editor} />
       <div className="size-full overflow-x-auto bg-gray-50 px-4 print:overflow-visible print:bg-white print:p-0">
         <div className="mx-auto flex w-[816px] min-w-max flex-col justify-center py-4 print:w-full print:min-w-0 print:py-0">

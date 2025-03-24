@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -11,9 +11,9 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '../ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Separator } from '../ui/separator';
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 
 export function TeamSelector() {
   const [isOpen, setIsOpen] = useState(false);

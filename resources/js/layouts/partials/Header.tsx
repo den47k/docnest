@@ -1,4 +1,4 @@
-import { CreateTeamModalTrigger } from '@/components/common/CreateTeamModal';
+import { CreateTeamModalTrigger } from '@/components/features/teams/CreateTeamModal';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,8 +14,8 @@ import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { SidebarTrigger } from './Sidebar';
-import { TeamSelector } from '@/components/common/TeamSelector';
-import { NotificationPopover } from '@/components/common/NotificationPopover';
+import { NotificationPopover } from '@/components/features/notifications/NotificationPopover';
+import { TeamSelector } from '@/components/features/teams/TeamSelector';
 
 
 export const Header = () => {

@@ -3,8 +3,8 @@ import { usePage } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { useToast } from "@/lib/hooks/use-toast";
 
-import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
-import { Button } from "../ui/button";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { Bell, Check, X } from "lucide-react";
 
 export function NotificationPopover() {
