@@ -31,7 +31,7 @@ export function TeamSelector() {
         <Button
           variant="outline"
           role="combobox"
-          className="w-[150px] justify-between rounded-full"
+          className="w-[150px] justify-between rounded-full truncate"
         >
           {selectedWorkspace?.id === 'personal'
             ? 'Personal'
