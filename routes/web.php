@@ -9,6 +9,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // Route::get('/', function () {
 //     return Inertia::render('Dashboard', [
@@ -31,6 +33,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
 
     Route::get('/', [DocumentController::class, 'index'])->name('index');
+    Route::post('/documents/update', function (Request $request)  {
+        Log::info($request);
+    });
     Route::resource('documents', DocumentController::class)->except('index');
     Route::get('/documents', [DocumentController::class, 'fetchDocuments'])->name('documents.index');
 

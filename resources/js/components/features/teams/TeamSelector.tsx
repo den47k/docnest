@@ -1,8 +1,6 @@
 import { useWorkspace } from '@/lib/contexts/WorkspaceContext';
 import { useState } from 'react';
 
-import { cn } from '@/lib/utils';
-import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -12,18 +10,27 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { Check, ChevronDown } from 'lucide-react';
 
 export function TeamSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const {
-    teams,
-    selectedWorkspace,
-    updateSelectedWorkspace,
-    isLoading
-  } = useWorkspace();
+  const { teams, selectedWorkspace, updateSelectedWorkspace, isLoading } =
+    useWorkspace();
+
+  const selectedWorkspaceName =
+    selectedWorkspace?.id === 'personal'
+      ? 'Personal'
+      : selectedWorkspace && 'name' in selectedWorkspace
+        ? selectedWorkspace.name
+        : '';
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -31,14 +38,13 @@ export function TeamSelector() {
         <Button
           variant="outline"
           role="combobox"
-          className="w-[150px] justify-between rounded-full truncate"
+          className="w-[150px] justify-between rounded-full"
+          title={selectedWorkspaceName}
         >
-          {selectedWorkspace?.id === 'personal'
-            ? 'Personal'
-            : selectedWorkspace && 'name' in selectedWorkspace
-            ? selectedWorkspace.name
-            : ''}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <span className="truncate">
+            {selectedWorkspaceName}
+          </span>
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">

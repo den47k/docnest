@@ -145,7 +145,7 @@ export default function Toolbar({ editor }: { editor: Editor }) {
   ];
 
   return (
-    <>
+    <div className='fixed top-0 left-0 right-0 z-50 bg-white'>
       {/* Menu Bar */}
       <div className="flex items-center justify-between border-b px-4 py-2">
         <div className="flex items-center">
@@ -216,6 +216,6 @@ export default function Toolbar({ editor }: { editor: Editor }) {
           <ToolbarButton key={item.label} {...item} />
         ))}
       </div>
-    </>
+    </div>
   );
 }
