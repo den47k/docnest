@@ -9,8 +9,11 @@ class Team extends Model
 {
     protected $fillable = ['name', 'owner_id', 'description'];
 
-    public function members()
-    {
+
+    /**
+     * Relationships
+     */
+    public function members() {
         return $this->belongsToMany(User::class)
             ->withPivot('role')
             ->withTimestamps();
@@ -26,8 +29,9 @@ class Team extends Model
 
 
 
-    // functions
-
+    /**
+     * functions
+     */
     public function hasUserWithEmail(string $email) {
         return $this->members->contains('email', $email);
     }

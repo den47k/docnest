@@ -18,6 +18,9 @@ class TeamInvitation extends Model
         'inviter_id',
     ];
 
+    /**
+     * Relationships
+     */
     public function team()
     {
         return $this->belongsTo(Team::class);

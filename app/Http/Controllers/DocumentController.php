@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DocumentUpdated;
 use App\Models\Document;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DocumentController extends Controller
 {
@@ -13,20 +16,6 @@ class DocumentController extends Controller
     public function index(Request $request)
     {
         return inertia('Dashboard');
-    }
-
-    public function fetchDocuments(Request $request)
-    {
-        $user = $request->user();
-        $teamId = $request->input('team_id', 'personal');
-
-        $query = $teamId === 'personal'
-            ? Document::whereNull('team_id')->where('user_id', $user->id)
-            : Document::where('team_id', $teamId);
-
-        return response()->json([
-            'data' => $query->get()
-        ]);
     }
 
     /**
@@ -59,10 +48,11 @@ class DocumentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Document $document)
     {
-        $document = Document::findOrFail($id);
-        dd($document);
+        return Inertia::render('DocumentEditor/DocumentEditor', [
+            'document' => $document,
+        ]);
     }
 
     /**
@@ -78,8 +68,12 @@ class DocumentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // $validated = $request->validate([
+        //     'operations' => 'required|array',
+        //     'clientId' => 'required|string' // To prevent echo
+        // ]);
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -87,5 +81,24 @@ class DocumentController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function fetchDocuments(Request $request)
+    {
+        $user = $request->user();
+        $teamId = $request->input('team_id', 'personal');
+
+        $query = $teamId === 'personal'
+            ? Document::whereNull('team_id')->where('user_id', $user->id)
+            : Document::where('team_id', $teamId);
+
+        return response()->json([
+            'data' => $query->get()
+        ]);
+    }
+
+    public function handleOperations(Request $request, Document $document)
+    {
+        broadcast(new DocumentUpdated($document, $request->steps));
     }
 }

@@ -40,19 +40,21 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {documents.map((doc) => (
               <div key={doc.id} className="group cursor-pointer">
-                <div className="aspect-[8.5/11] overflow-hidden rounded-lg border bg-white hover:border-blue-600">
-                  <div className="flex h-full w-full items-center justify-center p-4 text-sm text-[#5f6368]">
-                    {doc.title}
+                <Link href={route('documents.show', {document: doc.id })}>
+                  <div className="aspect-[8.5/11] overflow-hidden rounded-lg border bg-white hover:border-blue-600">
+                    <div className="flex h-full w-full items-center justify-center p-4 text-sm text-[#5f6368]">
+                      {doc.title}
+                    </div>
                   </div>
-                </div>
-                <div className="mt-2 space-y-1">
-                  <h3 className="truncate text-sm font-medium group-hover:text-blue-600">
-                    {doc.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {doc.updated_at}
-                  </p>
-                </div>
+                  <div className="mt-2 space-y-1">
+                    <h3 className="truncate text-sm font-medium group-hover:text-blue-600">
+                      {doc.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {doc.updated_at}
+                    </p>
+                  </div>
+                </Link>
               </div>
             ))}
           </div>

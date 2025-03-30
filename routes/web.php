@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
+use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -21,8 +22,9 @@ use Illuminate\Support\Facades\Log;
 //     ]);
 // })->middleware('auth')->name('dashboard');
 
-Route::get('/test', function () {
+Route::get('/test', function (Request $request) {
     return Inertia::render('DocumentEditor/DocumentEditor');
+    // dd(Team::find(1)->members()->where('user_id', $request->user()->id)->exists());
 })->name('test');
 
 
@@ -33,10 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
 
     Route::get('/', [DocumentController::class, 'index'])->name('index');
-    Route::post('/documents/update', function (Request $request)  {
-        Log::info($request);
-    });
     Route::resource('documents', DocumentController::class)->except('index');
+    Route::post('/documents/{document}/operations', [DocumentController::class, 'handleOperations'])->name('documents.handleOperations');
     Route::get('/documents', [DocumentController::class, 'fetchDocuments'])->name('documents.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

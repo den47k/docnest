@@ -46,8 +46,10 @@ class User extends Authenticatable
         ];
     }
 
-    public function ownedTeams()
-    {
+    /**
+     * Relationships
+     */
+    public function ownedTeams() {
         return $this->hasMany(Team::class, 'owner_id');
     }
 
