@@ -29,15 +29,14 @@ Route::get('/test', function (Request $request) {
 
 
 Route::middleware('auth')->group(function () {
+    Route::get('/', function() { return inertia('Dashboard'); })->name('index');
+
     Route::resource('teams', TeamController::class)->except('index', 'show');
     Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
     Route::get('/teams/current', [TeamController::class, 'getCurrentTeam'])->name('teams.current');
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
 
-    Route::get('/', [DocumentController::class, 'index'])->name('index');
-    Route::resource('documents', DocumentController::class)->except('index');
-    Route::post('/documents/{document}/operations', [DocumentController::class, 'handleOperations'])->name('documents.handleOperations');
-    Route::get('/documents', [DocumentController::class, 'fetchDocuments'])->name('documents.index');
+    Route::resource('documents', DocumentController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

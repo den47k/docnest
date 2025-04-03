@@ -15,7 +15,16 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
-        return inertia('Dashboard');
+        $user = $request->user();
+        $teamId = $request->input('team_id', 'personal');
+
+        $query = $teamId === 'personal'
+            ? Document::whereNull('team_id')->where('user_id', $user->id)
+            : Document::where('team_id', $teamId);
+
+        return response()->json([
+            'data' => $query->get()
+        ]);
     }
 
     /**
@@ -66,12 +75,38 @@ class DocumentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Document $document)
     {
-        // $validated = $request->validate([
-        //     'operations' => 'required|array',
-        //     'clientId' => 'required|string' // To prevent echo
-        // ]);
+        $validated = $request->validate([
+            'content' => 'required|array',
+        ]);
+
+        try {
+            $document->content = $validated['content'];
+            $document->save();
+
+            Log::info("Document updated successfully", [
+                'document_id' => $document->id,
+                'updated_by' => auth()->user(),
+            ]);
+
+            return response()->json([
+                'message' => 'Document updated successfully',
+                'document' => $document->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Document update failed", [
+                'error' => $e->getMessage(),
+                'document_id' => $document->id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to update document',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
 
@@ -85,20 +120,6 @@ class DocumentController extends Controller
 
     public function fetchDocuments(Request $request)
     {
-        $user = $request->user();
-        $teamId = $request->input('team_id', 'personal');
 
-        $query = $teamId === 'personal'
-            ? Document::whereNull('team_id')->where('user_id', $user->id)
-            : Document::where('team_id', $teamId);
-
-        return response()->json([
-            'data' => $query->get()
-        ]);
-    }
-
-    public function handleOperations(Request $request, Document $document)
-    {
-        broadcast(new DocumentUpdated($document, $request->steps));
     }
 }

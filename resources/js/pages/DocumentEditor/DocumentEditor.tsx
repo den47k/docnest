@@ -7,24 +7,23 @@ import TextAlign from '@tiptap/extension-text-align';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
-
 import { FontSizeExtension } from '@/extensions/font-size';
 
-import { usePage } from '@inertiajs/react';
-import { useEffect, useRef } from 'react';
+import Collaboration from '@tiptap/extension-collaboration';
+import { TiptapCollabProvider } from '@hocuspocus/provider';
+import * as Y from 'yjs';
+
+import { useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
+import { debounce } from '@/lib/utils';
 import Toolbar from './partials/Toolbar';
 import './styles.css';
 
 import { Document } from '@/types';
 
-declare const window: any;
-
-export default function Editor({ document }: {document: Document}) {
-  const clientId = usePage().props.auth.user.id;
-  const stepsBuffer = useRef<any[]>([]);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const versionRef = useRef(0);
+export default function Editor({ document }: { document: Document }) {
+  const ydoc = useMemo(() => new Y.Doc(), [document.id]);
+  const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
     editorProps: {
@@ -35,155 +34,59 @@ export default function Editor({ document }: {document: Document}) {
       },
     },
     extensions: [
-      StarterKit.configure({}),
+      StarterKit.configure({ history: false }),
+      Collaboration.configure({ document: ydoc }),
       FontSizeExtension,
       FontFamily,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
       TextStyle,
       TaskList,
-      TaskItem.configure({
-        nested: true,
-      }),
+      TaskItem.configure({ nested: true }),
       Underline,
     ],
   });
 
-  if (!editor) return;
+  // Debounced save handler
+  const handleSave = useRef(
+    debounce((content: any) => {
+      axios.put(`/documents/${document.id}`, { content })
+        .catch((error) => console.error('Save failed:', error));
+    }, 1000)
+  ).current;
 
   useEffect(() => {
-    if (window?.Echo) {
-      const channel = window.Echo.private(`documents.${document.id}`);
-
-      channel.listen('.document.updated', (operations) => {
-        console.log('Received operations:', operations);
-      });
-
-      return () => {
-        channel.stopListening('.DocumentUpdated');
-      };
-    }
-  }, [document]);
-
-  useEffect(() => {
-    if (!editor) return;
-
-    const mergeSteps = (steps: any[]) => {
-      if (steps.length === 0) return [];
-
-      const merged: any[] = [];
-      let currentMerge: any = null;
-      let expectedInsertionFrom: number | null = null;
-
-      for (const step of steps) {
-        if (step.stepType !== 'replace') {
-          if (currentMerge) {
-            merged.push(currentMerge);
-            currentMerge = null;
-            expectedInsertionFrom = null;
-          }
-          merged.push(step);
-          continue;
+    const provider = new TiptapCollabProvider({
+      name: document.id,
+      appId: '7j9y6m10',
+      token: 'notoken',
+      document: ydoc,
+      onSynced() {
+        if (!ydoc.getMap('config').get('initialContentLoaded') && editor) {
+          ydoc.getMap('config').set('initialContentLoaded', true);
+          editor.commands.setContent(JSON.parse(document.content));
         }
+      },
+    });
 
-        const isInsertion = step.from === step.to;
-        const isDeletion = step.from < step.to;
-        const hasTextContent =
-          isInsertion && step.slice.content?.[0]?.type === 'text';
-
-        // Merge insertion operations that are typed letter by letter
-        if (isInsertion && hasTextContent) {
-          const textContent = step.slice.content[0].text;
-
-          if (
-            currentMerge !== null &&
-            currentMerge?.from === currentMerge?.to
-          ) {
-            if (step.from === expectedInsertionFrom) {
-              currentMerge.slice.content[0].text += textContent;
-              expectedInsertionFrom = step.from + 1;
-            } else {
-              merged.push(currentMerge);
-              currentMerge = { ...step };
-              expectedInsertionFrom = step.from + 1;
-            }
-          } else {
-            if (currentMerge) merged.push(currentMerge);
-            currentMerge = { ...step };
-            expectedInsertionFrom = step.from + 1;
-          }
-        }
-
-        // Merge deletion operations that are removed letter by letter
-        else if (isDeletion) {
-          if ((currentMerge !== null) && (currentMerge?.from < currentMerge?.to)) {
-            if (step.from <= currentMerge.to && step.to >= currentMerge.from) {
-              currentMerge.from = Math.min(currentMerge.from, step.from);
-              currentMerge.to = Math.max(currentMerge.to, step.to);
-            } else {
-              merged.push(currentMerge);
-              currentMerge = { ...step };
-            }
-          } else {
-            if (currentMerge) merged.push(currentMerge);
-            currentMerge = { ...step };
-          }
-        }
-
-        // Handle other replace types
-        else {
-          if (currentMerge) {
-            merged.push(currentMerge);
-            currentMerge = null;
-            expectedInsertionFrom = null;
-          }
-          merged.push(step);
-        }
+    const handleUpdate = () => {
+      const initialLoaded = ydoc.getMap('config').get('initialContentLoaded');
+      if (initialLoaded && editor) {
+        const content = editor.getJSON();
+        handleSave(content);
       }
-
-      // No change for everything else
-      if (currentMerge) merged.push(currentMerge);
-
-      return merged;
     };
 
-    const handleUpdate = ({ transaction }: { transaction: any }) => {
-      if (transaction.steps.length === 0) return;
-
-      stepsBuffer.current.push(...transaction.steps);
-
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(async () => {
-        try {
-          const stepsToSend = stepsBuffer.current;
-          stepsBuffer.current = [];
-
-          const stepsJSON = stepsToSend.map((step) => step.toJSON());
-          const mergedSteps = mergeSteps(stepsJSON);
-
-          console.log(mergedSteps);
-
-          await axios.post(route('documents.handleOperations', document.id), {
-            steps: mergedSteps,
-            clientId,
-            version: versionRef.current,
-          });
-
-          versionRef.current++;
-        } catch (error) {
-          console.error('Update failed:', error);
-        }
-      }, 500);
-    };
-
-    editor.on('update', handleUpdate);
+    ydoc.on('update', handleUpdate);
 
     return () => {
-      editor.off('update', handleUpdate);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      ydoc.off('update', handleUpdate);
+      provider.destroy();
+      // Clear any pending saves on unmount
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, []);
+  }, [document.id, editor, ydoc, handleSave]);
+
+  if (!editor) return null;
 
   return (
     <>
