@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\DocumentUpdated;
+use Inertia\Inertia;
 use App\Models\Document;
 use Illuminate\Http\Request;
+use App\Events\DocumentUpdated;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
 
 class DocumentController extends Controller
 {
@@ -41,13 +42,16 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         Document::create([
-            'title' => 'Untitled',
+            'title' => 'Untitled document',
             'user_id' => auth()->id(),
             'content' => json_encode([
-                [
-                    'type' => 'paragraph',
-                    'children' => [
-                        ['text' => 'Start typing...'],
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'attrs' => [
+                            'textAlign' => null,
+                        ],
                     ],
                 ],
             ]),
@@ -59,8 +63,11 @@ class DocumentController extends Controller
      */
     public function show(Document $document)
     {
+        Gate::authorize('view', $document);
+
         return Inertia::render('DocumentEditor/DocumentEditor', [
             'document' => $document,
+            'canEdit' => request()->user()->can('update', $document)
         ]);
     }
 
@@ -94,7 +101,6 @@ class DocumentController extends Controller
                 'message' => 'Document updated successfully',
                 'document' => $document->fresh()
             ]);
-
         } catch (\Exception $e) {
             Log::error("Document update failed", [
                 'error' => $e->getMessage(),
@@ -116,10 +122,5 @@ class DocumentController extends Controller
     public function destroy(string $id)
     {
         //
-    }
-
-    public function fetchDocuments(Request $request)
-    {
-
     }
 }

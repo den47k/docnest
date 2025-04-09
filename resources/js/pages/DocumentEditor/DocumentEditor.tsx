@@ -74,6 +74,8 @@ export default function Editor({ document }: { document: Document }) {
         const content = editor.getJSON();
         handleSave(content);
       }
+
+      console.log(editor?.getJSON());
     };
 
     ydoc.on('update', handleUpdate);

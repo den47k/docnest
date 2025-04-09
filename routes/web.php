@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Log;
 // })->middleware('auth')->name('dashboard');
 
 Route::get('/test', function (Request $request) {
-    return Inertia::render('DocumentEditor/DocumentEditor');
+    dd(Document::find('0377fac2-cca8-4dec-b445-874c6d0d48af')->team);
+    // return Inertia::render('DocumentEditor/DocumentEditor');
     // dd(Team::find(1)->members()->where('user_id', $request->user()->id)->exists());
 })->name('test');
 
