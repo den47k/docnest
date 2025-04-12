@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Firebase\JWT\JWT;
 use App\Models\Document;
 use Illuminate\Http\Request;
-use App\Events\DocumentUpdated;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 
@@ -26,14 +26,6 @@ class DocumentController extends Controller
         return response()->json([
             'data' => $query->get()
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -65,9 +57,28 @@ class DocumentController extends Controller
     {
         Gate::authorize('view', $document);
 
+        $user = auth()->user();
+        $canEdit = $user->can('update', $document);
+
+        $documentName = (string) $document->id;
+
+        $payload = [
+            'sub' => $user->id,
+        ];
+
+        if ($canEdit) {
+            $payload['allowedDocumentNames'] = [$documentName];
+        } else {
+            $payload['allowedDocumentNames'] = [];
+            $payload['readonlyDocumentNames'] = [$documentName];
+        }
+
+        $token = JWT::encode($payload, config('app.key'), 'HS256');
+
         return Inertia::render('DocumentEditor/DocumentEditor', [
             'document' => $document,
-            'canEdit' => request()->user()->can('update', $document)
+            'canEdit' => $canEdit,
+            'collaborationToken' => $token,
         ]);
     }
 
