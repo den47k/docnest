@@ -33,20 +33,39 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'team_id' => ['nullable', 'exists:teams,id'],
+            'title' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user = $request->user();
+        $team = $validated['team_id']
+            ? Team::find($validated['team_id'])
+            : null;
+
+        Gate::authorize('create', [Document::class, $team]);
+
         Document::create([
-            'title' => 'Untitled document',
+            'title' => $validated['title'] ?? 'Untitled',
             'user_id' => auth()->id(),
+            'team_id' => $team?->id,
             'content' => json_encode([
-                'type' => 'doc',
-                'content' => [
-                    [
-                        'type' => 'paragraph',
-                        'attrs' => [
-                            'textAlign' => null,
+                [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => [
+                                'textAlign' => null,
+                            ],
                         ],
                     ],
                 ],
             ]),
+        ]);
+
+        return response()->json([
+            'message' => 'Document created successfully'
         ]);
     }
 
@@ -80,14 +99,6 @@ class DocumentController extends Controller
             'canEdit' => $canEdit,
             'collaborationToken' => $token,
         ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
