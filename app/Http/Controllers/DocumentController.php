@@ -79,25 +79,9 @@ class DocumentController extends Controller
         $user = auth()->user();
         $canEdit = $user->can('update', $document);
 
-        $documentName = (string) $document->id;
-
-        $payload = [
-            'sub' => $user->id,
-        ];
-
-        if ($canEdit) {
-            $payload['allowedDocumentNames'] = [$documentName];
-        } else {
-            $payload['allowedDocumentNames'] = [];
-            $payload['readonlyDocumentNames'] = [$documentName];
-        }
-
-        $token = JWT::encode($payload, config('app.key'), 'HS256');
-
-        return Inertia::render('DocumentEditor/DocumentEditor', [
+        return Inertia::render('DocumentEditor/DocumentPage', [
             'document' => $document,
             'canEdit' => $canEdit,
-            'collaborationToken' => $token,
         ]);
     }
 
