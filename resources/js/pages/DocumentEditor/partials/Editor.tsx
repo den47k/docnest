@@ -1,5 +1,5 @@
+import { useLiveblocksExtension } from '@liveblocks/react-tiptap';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
 
 import { FontSizeExtension } from '@/extensions/font-size';
 import FontFamily from '@tiptap/extension-font-family';
@@ -10,34 +10,18 @@ import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 
-// import { TiptapCollabProvider } from '@hocuspocus/provider';
-// import Collaboration from '@tiptap/extension-collaboration';
-// import * as Y from 'yjs';
-
-import { debounce } from '@/lib/utils';
-import axios from 'axios';
-import { useEffect, useRef } from 'react';
+import '../styles.css';
 import Toolbar from './Toolbar';
-import '../styles.css'
 
-import { Document } from '@/types';
-
-// const ydoc = new Y.Doc();
-
-export default function Editor({
-  document,
-  canEdit,
-}: {
-  document: Document;
-  canEdit: boolean;
-}) {
+export default function Editor({ canEdit }: { canEdit: boolean }) {
   const liveblocks = useLiveblocksExtension();
 
   const editor = useEditor({
     editorProps: {
       attributes: {
         style: 'padding-left: 56px; padding-right: 56px;',
-        class: 'focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text',
+        class:
+          'focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text',
       },
     },
     editable: canEdit,

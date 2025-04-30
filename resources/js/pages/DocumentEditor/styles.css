@@ -164,3 +164,15 @@
         }
     }
 }
+
+/* Disable collaborator cursors */
+.collaboration-cursor__caret {
+    display: none !important;
+}
+
+/* Disable collaborator selection highlights */
+[data-lb-actor],
+[data-lb-selection] {
+    background-color: transparent !important;
+}
+
