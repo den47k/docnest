@@ -1,12 +1,12 @@
-import { Team, Document } from '@/types';
-import axios from 'axios';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Document, Team } from '@/types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import React, { createContext, useContext } from 'react';
 
 type WorkspaceContextType = {
   teams: Team[];
   documents: Document[];
-  selectedWorkspace: Team | { id: 'personal' } | null;
+  currentTeam: Team | { id: 'personal' };
   isLoading: boolean;
   isDocumentsLoading: boolean;
   updateSelectedWorkspace: (workspaceId: string | null) => Promise<void>;
@@ -15,25 +15,39 @@ type WorkspaceContextType = {
 
 export const WorkspaceContext = createContext<WorkspaceContextType>(null!);
 
-export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) => {
+export const WorkspaceProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const queryClient = useQueryClient();
 
-  const { data: teams = [], isLoading: isTeamsLoading } = useQuery({
-    queryKey: ['teams'],
-    queryFn: () => axios.get(route('teams.index')).then(res => res.data.teams),
-  });
-
-  const { data: currentTeam, isLoading: isCurrentTeamLoading } = useQuery({
-    queryKey: ['current-team'],
-    queryFn: () => axios.get(route('teams.current')).then(res => res.data.currentTeam),
+  const { data: workspaceData, isLoading: isWorkspaceLoading } = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: async () => {
+      const response = await axios.get(route('teams.index'));
+      return {
+        teams: response.data.teams as Team[],
+        currentTeam: response.data.current_team as Team | { id: 'personal' },
+      };
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const { data: documents = [], isLoading: isDocumentsLoading } = useQuery({
-    queryKey: ['documents', currentTeam?.id],
-    queryFn: () => axios.get(route('documents.index'), {
-      params: { team_id: currentTeam.id === 'personal' ? null : currentTeam.id }
-    }).then(res => res.data.data),
-    enabled: !!currentTeam,
+    queryKey: ['documents', workspaceData?.currentTeam.id],
+    queryFn: async () => {
+      const response = await axios.get(route('documents.index'), {
+        params: {
+          team_id:
+            workspaceData?.currentTeam.id === 'personal'
+              ? null
+              : workspaceData?.currentTeam.id,
+        },
+      });
+      return response.data.data as Document[];
+    },
+    enabled: !!workspaceData?.currentTeam,
   });
 
   const updateSelectedWorkspace = async (workspaceId: string | null) => {
@@ -42,10 +56,15 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
         team_id: workspaceId ?? null,
       });
 
-      queryClient.setQueryData(['current-team'], () => data.currentTeam);
-      queryClient.invalidateQueries({ queryKey: ['teams'] });
+      queryClient.setQueryData(['workspaces'], (prev: any) => ({
+        ...prev,
+        currentTeam: data.current_team,
+      }));
+
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
     } catch (error) {
       console.error('Failed to switch workspace:', error);
+      throw error;
     }
   };
 
@@ -56,10 +75,10 @@ export const WorkspaceProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   const value = {
-    teams,
+    teams: workspaceData?.teams || [],
     documents,
-    selectedWorkspace: currentTeam,
-    isLoading: isTeamsLoading || isCurrentTeamLoading,
+    currentTeam: workspaceData?.currentTeam || { id: 'personal' },
+    isLoading: isWorkspaceLoading,
     isDocumentsLoading,
     updateSelectedWorkspace,
     refreshWorkspace,
