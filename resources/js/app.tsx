@@ -27,9 +27,9 @@ createInertiaApp({
       <QueryClientProvider client={queryClient}>
         <ModalProvider>
           <WorkspaceProvider>
-          <App {...props} />
-          <CreateTeamModal />
-          <Toaster />
+            <App {...props} />
+            <CreateTeamModal />
+            <Toaster />
           </WorkspaceProvider>
         </ModalProvider>
       </QueryClientProvider>,

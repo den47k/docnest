@@ -3,14 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\TeamRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -60,5 +63,20 @@ class User extends Authenticatable
 
     public function teamInvitationNotifications() {
         return $this->hasMany(TeamInvitation::class, 'user_id');
+    }
+
+    /**
+     * Functions
+     */
+    public function teamRole(Team $team): ?string {
+        if ($team->owner_id === $this->id) {
+            return TeamRole::Owner->value;
+        }
+
+        $membership = $this->allTeams()
+            ->where('team_id', $team->id)
+            ->first();
+
+        return $membership?->pivot->role;
     }
 }

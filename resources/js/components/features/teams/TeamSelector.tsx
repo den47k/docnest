@@ -22,14 +22,13 @@ import { Check, ChevronDown } from 'lucide-react';
 export function TeamSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { teams, selectedWorkspace, updateSelectedWorkspace, isLoading } =
-    useWorkspace();
+  const { teams, currentTeam, updateSelectedWorkspace } = useWorkspace();
 
   const selectedWorkspaceName =
-    selectedWorkspace?.id === 'personal'
+    currentTeam?.id === 'personal'
       ? 'Personal'
-      : selectedWorkspace && 'name' in selectedWorkspace
-        ? selectedWorkspace.name
+      : currentTeam && 'name' in currentTeam
+        ? currentTeam.name
         : '';
 
   return (
@@ -41,9 +40,7 @@ export function TeamSelector() {
           className="w-[150px] justify-between rounded-full"
           title={selectedWorkspaceName}
         >
-          <span className="truncate">
-            {selectedWorkspaceName}
-          </span>
+          <span className="truncate">{selectedWorkspaceName}</span>
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -63,7 +60,7 @@ export function TeamSelector() {
                 <Check
                   className={cn(
                     'mr-2 h-4 w-4',
-                    selectedWorkspace ? 'opacity-0' : 'opacity-100',
+                    currentTeam ? 'opacity-0' : 'opacity-100',
                   )}
                 />
                 Personal
@@ -81,9 +78,7 @@ export function TeamSelector() {
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      selectedWorkspace?.id === team.id
-                        ? 'opacity-100'
-                        : 'opacity-0',
+                      currentTeam?.id === team.id ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                   {team.name}

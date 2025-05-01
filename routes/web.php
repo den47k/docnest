@@ -7,8 +7,10 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\LiveblocksAuthController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\TeamInvitationController;
+use App\Http\Controllers\UserController;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,21 +25,21 @@ use Illuminate\Support\Facades\Log;
 // })->middleware('auth')->name('dashboard');
 
 Route::get('/test', function (Request $request) {
-    return Inertia::render('DocumentEditor/DocumentEditor');
+    dd(Document::find('0377fac2-cca8-4dec-b445-874c6d0d48af')->team);
+    // return Inertia::render('DocumentEditor/DocumentEditor');
     // dd(Team::find(1)->members()->where('user_id', $request->user()->id)->exists());
 })->name('test');
 
 
 Route::middleware('auth')->group(function () {
+    Route::get('/', function() { return inertia('Dashboard'); })->name('index');
+
     Route::resource('teams', TeamController::class)->except('index', 'show');
     Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
     Route::get('/teams/current', [TeamController::class, 'getCurrentTeam'])->name('teams.current');
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
 
-    Route::get('/', [DocumentController::class, 'index'])->name('index');
-    Route::resource('documents', DocumentController::class)->except('index');
-    Route::post('/documents/{document}/operations', [DocumentController::class, 'handleOperations'])->name('documents.handleOperations');
-    Route::get('/documents', [DocumentController::class, 'fetchDocuments'])->name('documents.index');
+    Route::resource('documents', DocumentController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

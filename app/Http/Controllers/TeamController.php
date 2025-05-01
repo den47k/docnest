@@ -9,36 +9,29 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Requests\CreateTeamRequest;
 use App\Models\Team;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Arr;
 
 class TeamController extends Controller
 {
     public function index(Request $request)
     {
-        return response()->json([
-            'teams' => $request->user()->allTeams()
-                ->get()
-                ->map(fn($team) => $team->only('id', 'name', 'description', 'owner_id'))
-        ]);
-    }
-
-
-    public function getCurrentTeam(Request $request)
-    {
         $user = $request->user();
+        $teams = $user->allTeams()
+            ->get()
+            ->map(fn($team) => $team->only('id', 'name', 'description', 'owner_id'));
+
         $teamId = Cache::get("selected_team_{$user->id}", 'personal');
+        $currentTeam = ['id' => 'personal'];
 
         if ($teamId !== 'personal') {
-            $team = $user->allTeams()->firstWhere('teams.id', $teamId);
-
-            if (!$team) {
-                Cache::put("selected_team_{$user->id}", 'personal', now()->addDays(1));
-                return response()->json(['currentTeam' => ['id' => 'personal']]);
-            }
-
-            return response()->json(['currentTeam' => $team->only('id', 'name')]);
+            $team = $teams->firstWhere('id', $teamId);
+            $currentTeam = $team ? Arr::only($team, ['id', 'name']) : $currentTeam;
         }
 
-        return response()->json(['currentTeam' => ['id' => 'personal']]);
+        return response()->json([
+            'teams' => $teams,
+            'current_team' => $currentTeam
+        ]);
     }
 
 
@@ -49,16 +42,19 @@ class TeamController extends Controller
 
         if ($teamId === 'personal') {
             Cache::put("selected_team_{$user->id}", 'personal', now()->addDays(1));
-            return response()->json(['currentTeam' => ['id' => 'personal']]);
+            return response()->json(['current_team' => ['id' => 'personal']]);
         }
 
-        $team = $user->allTeams()->firstWhere('teams.id', $teamId);
-        if (!$team) {
+        if (!$user->allTeams()->where('teams.id', $teamId)->exists()) {
             return response()->json(['message' => 'Unauthorized team selection'], 403);
         }
 
-        Cache::put("selected_team_{$user->id}", $team->id, now()->addDays(1));
-        return response()->json(['currentTeam' => $team->only('id', 'name')]);
+        Cache::put("selected_team_{$user->id}", $teamId, now()->addDays(1));
+        return response()->json([
+            'current_team' => $user->allTeams()
+                ->find($teamId)
+                ->only('id', 'name')
+        ]);
     }
 
     /**

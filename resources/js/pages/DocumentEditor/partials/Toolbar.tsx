@@ -18,7 +18,6 @@ import {
   ListOrderedIcon,
   ListTodoIcon,
   LucideIcon,
-  PrinterIcon,
   Redo2Icon,
   Share2,
   UnderlineIcon,
@@ -70,11 +69,6 @@ export default function Toolbar({ editor }: { editor: Editor }) {
         icon: Redo2Icon,
         onClick: () => editor.chain().focus().redo().run(),
       },
-      // {
-      //   label: 'Print',
-      //   icon: PrinterIcon,
-      //   onClick: () => window.print(),
-      // },
     ],
     [
       {

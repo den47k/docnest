@@ -9,11 +9,7 @@ import { Clock, Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const {
-    documents,
-    teams,
-    selectedWorkspace,
-    updateSelectedWorkspace,
-    isLoading
+    documents
   } = useWorkspace();
 
   return (

@@ -9,7 +9,16 @@ class Document extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['title', 'content', 'user_id', 'team_id'];
+    protected $casts = [
+        'content' => 'array',
+    ];
+
+    protected $fillable = [
+        'title',
+        'content',
+        'user_id',
+        'team_id'
+    ];
 
     /**
      * Relationships

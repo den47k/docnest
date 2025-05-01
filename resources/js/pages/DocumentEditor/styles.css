@@ -164,3 +164,21 @@
         }
     }
 }
+
+/* Disable collaborator cursors */
+.collaboration-cursor__caret {
+    display: none !important;
+}
+
+/* Remove selection background */
+.ProseMirror-yjs-selection {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+/* Disable collaborator selection highlights */
+[data-lb-actor],
+[data-lb-selection] {
+    background-color: transparent !important;
+}
+
