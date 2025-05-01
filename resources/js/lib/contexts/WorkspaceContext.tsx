@@ -60,8 +60,6 @@ export const WorkspaceProvider = ({
         ...prev,
         currentTeam: data.current_team,
       }));
-
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
     } catch (error) {
       console.error('Failed to switch workspace:', error);
       throw error;

@@ -22,8 +22,7 @@ import { Check, ChevronDown } from 'lucide-react';
 export function TeamSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { teams, currentTeam, updateSelectedWorkspace } =
-    useWorkspace();
+  const { teams, currentTeam, updateSelectedWorkspace } = useWorkspace();
 
   const selectedWorkspaceName =
     currentTeam?.id === 'personal'
