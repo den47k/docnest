@@ -1,61 +1,88 @@
-import { useContext, useEffect, useState } from 'react';
-
+import DocumentCard from '@/components/features/documents/DocumentCard';
 import { Button } from '@/components/ui/button';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { useWorkspace, WorkspaceContext } from '@/lib/contexts/WorkspaceContext';
-import { Link } from '@inertiajs/react';
+import { useWorkspace } from '@/lib/contexts/WorkspaceContext';
+import { Document } from '@/types';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { Clock, Plus } from 'lucide-react';
 
-
-export default function Dashboard() {
-  const {
-    documents
-  } = useWorkspace();
-
+export default function Dashboard({ canManageDocuments }: { canManageDocuments: boolean }) {
   return (
     <AuthenticatedLayout>
-      <main className="container mx-auto max-w-[1200px] space-y-8 px-4 py-6">
+      <DashboardContent canManageDocuments={canManageDocuments} />
+    </AuthenticatedLayout>
+  );
+}
+
+function DashboardContent({ canManageDocuments }: { canManageDocuments: boolean }) {
+  const queryClient = useQueryClient();
+  const {
+    currentTeam,
+    isLoading: isWorkspaceLoading,
+  } = useWorkspace();
+
+  const { data: documents = [], isLoading: isDocumentsLoading } = useQuery({
+    queryKey: ['documents', currentTeam.id],
+    queryFn: async () => {
+      const response = await axios.get(route('documents.index'), {
+        params: {
+          team_id: currentTeam.id === 'personal' ? null : currentTeam.id,
+        },
+      });
+      return response.data.data as Document[];
+    },
+    enabled: !!currentTeam && 'id' in currentTeam,
+  });
+
+  const createNewDocument = async () => {
+    try {
+      const response = await axios.post(route('documents.store'), {
+        team_id: currentTeam.id === 'personal' ? null : currentTeam.id,
+      });
+      const newDocument = response.data.document;
+      await queryClient.invalidateQueries({
+        queryKey: ['documents', currentTeam.id],
+      });
+      window.location.href = route('documents.show', {
+        document: newDocument.id,
+      });
+    } catch (error) {
+      console.error('Failed to create document:', error);
+    }
+  };
+
+  return (
+    <main className="container mx-auto max-w-[1200px] space-y-8 px-4 py-6">
+      {canManageDocuments && (
         <div className="flex items-center gap-4">
-          <Link href={route('test')}>
-            <Button
-              className="gap-2 rounded-full border px-6 shadow-sm"
-              variant={'ghost'}
-            >
-              <Plus className="h-5 w-5" />
-              New
-            </Button>
-          </Link>
+        <Button
+          className="gap-2 rounded-full border px-6 shadow-sm"
+          variant={'ghost'}
+          onClick={createNewDocument}
+        >
+          <Plus className="h-5 w-5" />
+          New
+        </Button>
+      </div>
+      )}
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Clock className="h-4 w-4" />
+          <span className="text-sm">Recent documents</span>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span className="text-sm">Recent documents</span>
-          </div>
-
+        {isDocumentsLoading || isWorkspaceLoading ? (
+          <div className="text-muted-foreground">Loading documents...</div>
+        ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {documents.map((doc) => (
-              <div key={doc.id} className="group cursor-pointer">
-                <Link href={route('documents.show', {document: doc.id })}>
-                  <div className="aspect-[8.5/11] overflow-hidden rounded-lg border bg-white hover:border-blue-600">
-                    <div className="flex h-full w-full items-center justify-center p-4 text-sm text-[#5f6368]">
-                      {doc.title}
-                    </div>
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    <h3 className="truncate text-sm font-medium group-hover:text-blue-600">
-                      {doc.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.updated_at}
-                    </p>
-                  </div>
-                </Link>
-              </div>
+              <DocumentCard key={doc.id} document={doc} canManageDocuments={canManageDocuments} />
             ))}
           </div>
-        </div>
-      </main>
-    </AuthenticatedLayout>
+        )}
+      </div>
+    </main>
   );
 }

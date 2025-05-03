@@ -3,6 +3,7 @@ import { WorkspaceProvider } from '@/lib/contexts/WorkspaceContext';
 import { ReactNode } from 'react';
 import { Header } from './partials/Header';
 import { Sidebar } from './partials/Sidebar';
+import { usePage } from '@inertiajs/react';
 
 declare const window: any;
 
@@ -13,8 +14,9 @@ type AuthenticatedLayoutProps = {
 export default function AuthenticatedLayout({
   children,
 }: AuthenticatedLayoutProps) {
+  const { user } = usePage().props.auth;
   return (
-    // <WorkspaceProvider>
+    <WorkspaceProvider user={user}>
       <SidebarProvider>
         <div className="flex max-h-screen flex-col">
           <Header />
@@ -22,6 +24,6 @@ export default function AuthenticatedLayout({
           {children}
         </div>
       </SidebarProvider>
-    // </WorkspaceProvider>
+    </WorkspaceProvider>
   );
 }

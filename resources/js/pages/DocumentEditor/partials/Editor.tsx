@@ -12,8 +12,9 @@ import StarterKit from '@tiptap/starter-kit';
 
 import '../styles.css';
 import Toolbar from './Toolbar';
+import { Document } from '@/types';
 
-export default function Editor({ canEdit }: { canEdit: boolean }) {
+export default function Editor({ document, canEdit }: { document: Document, canEdit: boolean }) {
   const liveblocks = useLiveblocksExtension();
 
   const editor = useEditor({
@@ -42,7 +43,7 @@ export default function Editor({ canEdit }: { canEdit: boolean }) {
 
   return (
     <>
-      <Toolbar editor={editor} />
+      <Toolbar document={document} editor={editor} canEdit={canEdit} />
       <div className="size-full overflow-x-auto bg-gray-50 px-4 pt-[90px] print:overflow-visible print:bg-white print:p-0">
         <div className="mx-auto flex w-[816px] min-w-max flex-col justify-center py-4 print:w-full print:min-w-0 print:py-0">
           <EditorContent editor={editor} />

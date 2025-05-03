@@ -7,15 +7,22 @@ use App\Models\Document;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class DocumentPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User $user, $team = null): Response
     {
-        return false;
+        if ($team instanceof Team) {
+            return $user->belongsTo($team)
+                ? Response::allow()
+                : Response::deny('You are not part of this team.');
+        }
+
+        return Response::allow();
     }
 
     /**

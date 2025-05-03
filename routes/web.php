@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Models\Team;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
@@ -14,15 +15,7 @@ use App\Http\Controllers\UserController;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
-// Route::get('/', function () {
-//     return Inertia::render('Dashboard', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// })->middleware('auth')->name('dashboard');
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 Route::get('/test', function (Request $request) {
     dd(Document::find('0377fac2-cca8-4dec-b445-874c6d0d48af')->team);
@@ -32,21 +25,19 @@ Route::get('/test', function (Request $request) {
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function() { return inertia('Dashboard'); })->name('index');
+    Route::get('/', DashboardController::class)->name('index');
 
-    Route::resource('teams', TeamController::class)->except('index', 'show');
-    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
-    Route::get('/teams/current', [TeamController::class, 'getCurrentTeam'])->name('teams.current');
+    Route::resource('teams', TeamController::class)->except('show');
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
+
+    Route::post('/teams/{team}/members', [TeamMemberController::class, 'invite'])->name('teams.members.store');
+    Route::post('/teams/invitations/{invitation}', [TeamMemberController::class, 'store'])->name('teams.invitations.store');
 
     Route::resource('documents', DocumentController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::post('/teams/{team}/members', [TeamMemberController::class, 'invite'])->name('teams.members.store');
-    Route::post('/teams/invitations/{invitation}', [TeamMemberController::class, 'store'])->name('teams.invitations.store');
 
     Route::get('/notifications/team-invitations', [TeamInvitationController::class, 'index'])->name('teams.invitations.index');
     Route::delete('/notifications/team-invitations/{invitation}', [TeamInvitationController::class, 'destroy'])->name('teams.invitations.destroy');

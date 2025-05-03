@@ -15,14 +15,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Check, ChevronDown } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 export function TeamSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { teams, currentTeam, updateSelectedWorkspace } = useWorkspace();
+  const { teams, currentTeam, isLoading, updateSelectedWorkspace } =
+    useWorkspace();
 
   const selectedWorkspaceName =
     currentTeam?.id === 'personal'
@@ -30,6 +31,11 @@ export function TeamSelector() {
       : currentTeam && 'name' in currentTeam
         ? currentTeam.name
         : '';
+
+  const handleWorkspaceChange = async (teamId: string | null) => {
+    await updateSelectedWorkspace(teamId);
+    router.reload();
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -40,8 +46,14 @@ export function TeamSelector() {
           className="w-[150px] justify-between rounded-full"
           title={selectedWorkspaceName}
         >
-          <span className="truncate">{selectedWorkspaceName}</span>
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {isLoading ? (
+            <span className="text-muted-foreground">Loading...</span>
+          ) : (
+            <>
+              <span className="truncate">{selectedWorkspaceName}</span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -53,9 +65,10 @@ export function TeamSelector() {
               <CommandItem
                 value={'personal'}
                 onSelect={() => {
-                  updateSelectedWorkspace(null);
+                  handleWorkspaceChange(null);
                   setIsOpen(false);
                 }}
+                className={teams.length > 0 ? 'border-b' : ''}
               >
                 <Check
                   className={cn(
@@ -65,13 +78,12 @@ export function TeamSelector() {
                 />
                 Personal
               </CommandItem>
-              <Separator />
               {teams.map((team) => (
                 <CommandItem
                   key={team.id}
                   value={team.id}
                   onSelect={() => {
-                    updateSelectedWorkspace(team.id);
+                    handleWorkspaceChange(team.id);
                     setIsOpen(false);
                   }}
                 >
