@@ -44,6 +44,8 @@ export function CreateTeamModal() {
   const { isOpen, closeModal } = useModal();
   const isCreateTeamOpen = isOpen('createTeam');
 
+  console.log('CreateTeamModal open:', isCreateTeamOpen);
+
   const {
     register,
     handleSubmit,
@@ -78,11 +80,16 @@ export function CreateTeamModal() {
       teamDescription: '',
       invites: [{ email: '', role: TeamRole.viewer }],
     });
+    // reset();
 
     clearErrors();
 
     closeModal('createTeam');
   };
+
+  if (!isCreateTeamOpen) {
+    return null;
+  }
 
   return (
     <Modal

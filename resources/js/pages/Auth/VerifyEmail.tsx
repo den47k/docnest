@@ -1,51 +1,53 @@
-import PrimaryButton from '@/components/features/PrimaryButton';
 import GuestLayout from '@/layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    const { post, processing } = useForm({});
+  const { post, processing } = useForm({});
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
+  const submit: FormEventHandler = (e) => {
+    e.preventDefault();
+    post(route('verification.send'));
+  };
 
-        post(route('verification.send'));
-    };
+  return (
+    <GuestLayout>
+      <Head title="Email Verification" />
 
-    return (
-        <GuestLayout>
-            <Head title="Email Verification" />
+      <div className="space-y-6">
+        <div className="text-center text-muted-foreground">
+          Thanks for signing up! Please check your email for a verification link.
+          If you didn't receive the email, we'll gladly send another.
+        </div>
 
-            <div className="mb-4 text-sm text-gray-600">
-                Thanks for signing up! Before getting started, could you verify
-                your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
-            </div>
+        {status === 'verification-link-sent' && (
+          <Alert variant="default">
+            <AlertDescription>
+              A new verification link has been sent to your email address.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            {status === 'verification-link-sent' && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address
-                    you provided during registration.
-                </div>
-            )}
+        <form onSubmit={submit} className="space-y-4">
+          <Button className="w-full" disabled={processing}>
+            Resend Verification Email
+          </Button>
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
-                        Resend Verification Email
-                    </PrimaryButton>
-
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Log Out
-                    </Link>
-                </div>
-            </form>
-        </GuestLayout>
-    );
+          <div className="text-center text-sm text-muted-foreground">
+            Need to sign out?{' '}
+            <Link
+              href={route('logout')}
+              method="post"
+              as="button"
+              className="text-primary hover:underline underline-offset-4"
+            >
+              Log Out
+            </Link>
+          </div>
+        </form>
+      </div>
+    </GuestLayout>
+  );
 }

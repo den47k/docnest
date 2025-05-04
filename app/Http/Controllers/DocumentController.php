@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Team;
 use Inertia\Inertia;
-use Firebase\JWT\JWT;
 use App\Models\Document;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Events\DocumentTitleUpdated;
 use Illuminate\Support\Facades\Gate;
 

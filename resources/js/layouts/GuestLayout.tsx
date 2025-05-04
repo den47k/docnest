@@ -1,13 +1,19 @@
-import { Link } from '@inertiajs/react';
+// @/layouts/GuestLayout.tsx
 import { PropsWithChildren } from 'react';
+import { Card } from '@/components/ui/card';
 
 export default function Guest({ children }: PropsWithChildren) {
-    return (
-        <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0">
-
-            <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
-                {children}
-            </div>
+  return (
+    // <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center p-4 sm:p-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="flex justify-center">
+          <span className="text-2xl font-bold text-primary">DocNest</span>
         </div>
-    );
+        <Card className="p-6 sm:p-8 shadow-lg rounded-xl">
+          {children}
+        </Card>
+      </div>
+    </div>
+  );
 }
