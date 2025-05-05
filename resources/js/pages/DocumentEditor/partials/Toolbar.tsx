@@ -1,11 +1,11 @@
 import { FontFamilySelector } from '@/components/features/document-editor/FontFamilySelector';
 import { FontSizeSelector } from '@/components/features/document-editor/FontSizeSelector';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Document } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Editor } from '@tiptap/react';
 import axios from 'axios';
 import {
@@ -21,7 +21,6 @@ import {
   ListTodoIcon,
   LucideIcon,
   Redo2Icon,
-  Share2,
   UnderlineIcon,
   Undo2Icon,
 } from 'lucide-react';
@@ -58,6 +57,7 @@ export default function Toolbar({
   editor: Editor;
   canEdit: boolean;
 }) {
+  const { user } = usePage().props.auth;
   const [documentTitle, setDocumentTitle] = useState(document.title);
   const [isDocumentTitleDirty, setIsDocumentTitleDirty] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -215,57 +215,58 @@ export default function Toolbar({
         </div>
 
         <div className="flex space-x-6">
-          <Button className="rounded-full shadow-sm" variant="outline">
-            <Share2 className="h-5 w-5" />
-            Share
-          </Button>
-
-          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src="/placeholder.svg" alt="Profile" />
-              <AvatarFallback>DN</AvatarFallback>
-            </Avatar>
-          </Button>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>
+              {user.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-x-0.5 overflow-x-auto border-b bg-muted/30 px-4 py-1">
-        {sections[0].map((item) => (
-          <ToolbarButton key={item.label} {...item} />
-        ))}
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        <FontFamilySelector editor={editor} />
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        <FontSizeSelector editor={editor} />
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        {sections[1].map((item) => (
-          <ToolbarButton key={item.label} {...item} />
-        ))}
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        {sections[2].map((item) => (
-          <ToolbarButton key={item.label} {...item} />
-        ))}
-        <Separator
-          orientation="vertical"
-          className="mx-0.5 h-6 bg-neutral-300"
-        />
-        {sections[3].map((item) => (
-          <ToolbarButton key={item.label} {...item} />
-        ))}
-      </div>
+      {canEdit && (
+        <div className="flex items-center gap-x-0.5 overflow-x-auto border-b bg-muted/30 px-4 py-1">
+          {sections[0].map((item) => (
+            <ToolbarButton key={item.label} {...item} />
+          ))}
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 h-6 bg-neutral-300"
+          />
+          <FontFamilySelector editor={editor} />
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 h-6 bg-neutral-300"
+          />
+          <FontSizeSelector editor={editor} />
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 h-6 bg-neutral-300"
+          />
+          {sections[1].map((item) => (
+            <ToolbarButton key={item.label} {...item} />
+          ))}
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 h-6 bg-neutral-300"
+          />
+          {sections[2].map((item) => (
+            <ToolbarButton key={item.label} {...item} />
+          ))}
+          <Separator
+            orientation="vertical"
+            className="mx-0.5 h-6 bg-neutral-300"
+          />
+          {sections[3].map((item) => (
+            <ToolbarButton key={item.label} {...item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

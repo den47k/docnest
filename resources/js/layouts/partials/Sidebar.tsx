@@ -1,15 +1,21 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/SidebarContext';
+import { useWorkspace } from '@/lib/contexts/WorkspaceContext';
+import { useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { FileText, Menu, Plus, Settings, Trash2, Users } from 'lucide-react';
 import React, { ElementType, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
 const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
+    const queryClient = useQueryClient();
     const { isSidebarOpen, toggleSidebar } = useSidebar();
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const {
+        currentTeam,
+      } = useWorkspace();
 
-    // Close sidebar when clicking outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (
@@ -27,6 +33,23 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
       };
     }, [isSidebarOpen, toggleSidebar]);
 
+    const createNewDocument = async () => {
+      try {
+        const response = await axios.post(route('documents.store'), {
+          team_id: currentTeam.id === 'personal' ? null : currentTeam.id,
+        });
+        const newDocument = response.data.document;
+        await queryClient.invalidateQueries({
+          queryKey: ['documents', currentTeam.id],
+        });
+        window.location.href = route('documents.show', {
+          document: newDocument.id,
+        });
+      } catch (error) {
+        console.error('Failed to create document:', error);
+      }
+    };
+
     return (
       <div className="group" data-state={isSidebarOpen ? 'open' : 'closed'}>
         <aside
@@ -43,7 +66,10 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 
           {/* Create New Document Button */}
           <div className="px-4 pb-4">
-            <Button className="w-full justify-start">
+            <Button
+              className="w-full justify-start"
+              onClick={createNewDocument}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create New Document
             </Button>

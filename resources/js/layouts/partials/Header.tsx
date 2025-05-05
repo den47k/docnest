@@ -1,5 +1,7 @@
+import { NotificationPopover } from '@/components/features/notifications/NotificationPopover';
 import { CreateTeamModalTrigger } from '@/components/features/teams/CreateTeamModal';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TeamSelector } from '@/components/features/teams/TeamSelector';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,9 +16,6 @@ import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { SidebarTrigger } from './Sidebar';
-import { NotificationPopover } from '@/components/features/notifications/NotificationPopover';
-import { TeamSelector } from '@/components/features/teams/TeamSelector';
-
 
 export const Header = () => {
   const { auth } = usePage<PageProps>().props;
@@ -29,7 +28,9 @@ export const Header = () => {
         <div className="flex items-center space-x-4">
           <SidebarTrigger />
           <span className="cursor-pointer select-none text-lg font-bold">
-            <Link className='w-full h-full' href={route('index')}>Docnest</Link>
+            <Link className="h-full w-full" href={route('index')}>
+              Docnest
+            </Link>
           </span>
         </div>
 
@@ -53,14 +54,19 @@ export const Header = () => {
 
           <NotificationPopover />
 
-
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg" alt="Profile" />
-                  <AvatarFallback>DN</AvatarFallback>
+                  <AvatarFallback>
+                    {user.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -77,7 +83,9 @@ export const Header = () => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link className='w-full h-full' href={route('profile.edit')}>Profile</Link>
+                <Link className="h-full w-full" href={route('profile.edit')}>
+                  Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>

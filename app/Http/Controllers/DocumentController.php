@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use App\Events\DocumentTitleUpdated;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Support\Facades\Gate;
 
 class DocumentController extends Controller

@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/react';
 import DeleteUserForm from './partials/DeleteUserForm';
 import UpdatePasswordForm from './partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './partials/UpdateProfileInformationForm';
+import { Card } from '@/components/ui/card';
 
 export default function Edit({
   mustVerifyEmail,
@@ -14,23 +15,22 @@ export default function Edit({
     <AuthenticatedLayout>
       <Head title="Profile" />
 
-      <div className="py-12">
-        <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
+      <div className="py-4">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <Card className="p-6">
             <UpdateProfileInformationForm
               mustVerifyEmail={mustVerifyEmail}
               status={status}
-              className="max-w-xl"
             />
-          </div>
+          </Card>
 
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-            <UpdatePasswordForm className="max-w-xl" />
-          </div>
+          <Card className="p-6">
+            <UpdatePasswordForm />
+          </Card>
 
-          <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-            <DeleteUserForm className="max-w-xl" />
-          </div>
+          <Card className="p-6">
+            <DeleteUserForm />
+          </Card>
         </div>
       </div>
     </AuthenticatedLayout>
