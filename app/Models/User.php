@@ -53,23 +53,32 @@ class User extends Authenticatable
     /**
      * Relationships
      */
-    public function ownedTeams() {
+    public function ownedTeams()
+    {
         return $this->hasMany(Team::class, 'owner_id');
     }
 
-    public function allTeams() {
+    public function allTeams()
+    {
         return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
             ->withPivot('role');
     }
 
-    public function teamInvitationNotifications() {
+    public function teamInvitationNotifications()
+    {
         return $this->hasMany(TeamInvitation::class, 'user_id');
     }
 
     /**
      * Functions
      */
-    public function teamRole(Team $team): ?string {
+    public function belongsToTeam(Team $team)
+    {
+        return $this->allTeams()->get()->contains('id', $team->id);
+    }
+
+    public function teamRole(Team $team): ?string
+    {
         if ($team->owner_id === $this->id) {
             return TeamRole::Owner->value;
         }

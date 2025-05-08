@@ -17,7 +17,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { SidebarTrigger } from './Sidebar';
 
-export const Header = () => {
+export const Header = ({ showExtras = true }: { showExtras?: boolean }) => {
   const { auth } = usePage<PageProps>().props;
   const { invitations, ...user } = auth.user;
 
@@ -35,22 +35,24 @@ export const Header = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="max-w-[500px] flex-1 px-6">
-          <form>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search documents..."
-                className="w-full rounded-full pl-10"
-              />
-            </div>
-          </form>
-        </div>
+        {showExtras && (
+          <div className="max-w-[500px] flex-1 px-6">
+            <form>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search documents..."
+                  className="w-full rounded-full pl-10"
+                />
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Right Section */}
         <div className="flex items-center space-x-6">
-          <TeamSelector />
+          {showExtras && <TeamSelector />}
 
           <NotificationPopover />
 
@@ -89,7 +91,7 @@ export const Header = () => {
               </DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem>
-                <CreateTeamModalTrigger />
+                <CreateTeamModalTrigger useCustomButton={true} />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>

@@ -29,7 +29,7 @@ export const WorkspaceProvider = ({
   } = useQuery({
     queryKey: ['workspaces'],
     queryFn: async () => {
-      const response = await axios.get(route('teams.index'));
+      const response = await axios.get(route('teams.data'));
       return {
         teams: response.data.teams as Team[],
         currentTeam: response.data.current_team as Team | { id: 'personal' },

@@ -13,18 +13,26 @@ class Team extends Model
     /**
      * Relationships
      */
-    public function members() {
+    public function members()
+    {
         return $this->belongsToMany(User::class)
             ->withPivot('role')
             ->withTimestamps();
     }
 
-    public function owner() {
+    public function owner()
+    {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function teamInvitations() {
+    public function teamInvitations()
+    {
         return $this->hasMany(TeamInvitation::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
     }
 
 
@@ -32,7 +40,8 @@ class Team extends Model
     /**
      * functions
      */
-    public function hasUserWithEmail(string $email) {
+    public function hasUserWithEmail(string $email)
+    {
         return $this->members->contains('email', $email);
     }
 }

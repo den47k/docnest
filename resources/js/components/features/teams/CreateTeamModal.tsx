@@ -21,6 +21,8 @@ import { useModal } from '@/lib/contexts/ModalContext';
 
 import { router } from '@inertiajs/react';
 import { PlusCircle, X } from 'lucide-react';
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 enum TeamRole {
   admin = 'admin',
@@ -43,8 +45,7 @@ type FormInput = {
 export function CreateTeamModal() {
   const { isOpen, closeModal } = useModal();
   const isCreateTeamOpen = isOpen('createTeam');
-
-  console.log('CreateTeamModal open:', isCreateTeamOpen);
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -70,6 +71,7 @@ export function CreateTeamModal() {
     router.post(route('teams.store'), data, {
       onSuccess: () => {
         handleClose();
+        queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       }
     });
   };
@@ -80,7 +82,6 @@ export function CreateTeamModal() {
       teamDescription: '',
       invites: [{ email: '', role: TeamRole.viewer }],
     });
-    // reset();
 
     clearErrors();
 
@@ -116,7 +117,7 @@ export function CreateTeamModal() {
             />
           </div>
           <div>
-            <Label>Team description</Label>
+            <Label>Description (optional)</Label>
             <Textarea
               className="mt-1 max-h-40"
               {...register('teamDescription', {
@@ -199,12 +200,32 @@ export function CreateTeamModal() {
   );
 }
 
-export function CreateTeamModalTrigger() {
+export function CreateTeamModalTrigger({ useCustomButton = false, children = "New Team", className = '', ...props }: { useCustomButton?: boolean, children?: React.ReactNode, className?: string }) {
   const { openModal } = useModal();
 
+  const handleClick = () => {
+    openModal('createTeam');
+  };
+
+  if (useCustomButton) {
+    return (
+      <button
+        className={`flex w-full h-full ${className}`}
+        onClick={handleClick}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+
   return (
-    <button className="flex w-full h-full" onClick={() => openModal('createTeam')}>
-      New Team
-    </button>
+    <Button
+      className={className}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </Button>
   );
 }

@@ -1,4 +1,5 @@
 import { TeamInvitation } from '@/types';
+import { router } from '@inertiajs/react';
 import { ToastAction } from '@radix-ui/react-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
@@ -94,6 +95,7 @@ export const useNotifications = (
 
       if (action === 'accept') {
         await queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+        router.reload();
       }
 
       setNotifications((prev) => [

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useWorkspace } from '@/lib/contexts/WorkspaceContext';
 import { Document } from '@/types';
+import { Head } from '@inertiajs/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Clock, Plus } from 'lucide-react';
@@ -10,6 +11,7 @@ import { Clock, Plus } from 'lucide-react';
 export default function Dashboard({ canManageDocuments }: { canManageDocuments: boolean }) {
   return (
     <AuthenticatedLayout>
+      <Head title="Dashboard" />
       <DashboardContent canManageDocuments={canManageDocuments} />
     </AuthenticatedLayout>
   );

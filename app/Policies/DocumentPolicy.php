@@ -62,7 +62,6 @@ class DocumentPolicy
                 : Response::deny('You need at least Editor role to create team documents');
         }
 
-        // Always allow personal document creation
         return Response::allow();
     }
 
@@ -97,7 +96,7 @@ class DocumentPolicy
             $allowed = $this->checkTeamPermissions(
                 $user,
                 $document->team,
-                [TeamRole::Owner->value, TeamRole::Admin->value, TeamRole::Member->value]
+                [TeamRole::Owner->value, TeamRole::Admin->value]
             );
 
             return $allowed

@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AddTeamMember
 {
-    /**
-     * Create a new class instance.
-     */
     public function execute(User $user, TeamInvitation $invitation)
     {
         $this->validate($user, $invitation);

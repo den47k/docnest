@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\AddTeamMember;
+use App\Models\TeamInvitation;
 use Illuminate\Http\Request;
 
 class TeamInvitationController extends Controller
@@ -27,6 +29,15 @@ class TeamInvitationController extends Controller
             });
 
         return response()->json($invitations);
+    }
+
+    public function store($teamInvitationId) {
+        $teamInvitation = TeamInvitation::findOrFail($teamInvitationId);
+
+        $addteamMemberAction = new AddTeamMember();
+        $addteamMemberAction->execute(auth()->user(), $teamInvitation);
+
+        return back(303);
     }
 
     public function destroy(Request $request, $invitationId)

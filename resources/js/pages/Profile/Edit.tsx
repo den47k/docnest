@@ -15,7 +15,7 @@ export default function Edit({
     <AuthenticatedLayout>
       <Head title="Profile" />
 
-      <div className="py-4">
+      <main className="container mx-auto max-w-[1200px] space-y-8 px-4 py-6">
         <div className="mx-auto max-w-3xl space-y-6">
           <Card className="p-6">
             <UpdateProfileInformationForm
@@ -32,7 +32,7 @@ export default function Edit({
             <DeleteUserForm />
           </Card>
         </div>
-      </div>
+      </main>
     </AuthenticatedLayout>
   );
 }

@@ -11,20 +11,25 @@ import { Sidebar } from './partials/Sidebar';
 declare const window: any;
 
 type AuthenticatedLayoutProps = {
+  showExtras?: boolean;
   children: ReactNode;
 };
 
 export default function AuthenticatedLayout({
+  showExtras = true,
   children,
 }: AuthenticatedLayoutProps) {
   const { user } = usePage().props.auth;
+
+  const { url } = usePage();
+  const currentPath = new URL(url, window.location.origin).pathname;
   return (
     <ModalProvider>
       <WorkspaceProvider user={user}>
         <SidebarProvider>
           <div className="flex max-h-screen flex-col">
-            <Header />
-            <Sidebar />
+            <Header showExtras={showExtras} />
+            <Sidebar currentPath={currentPath} />
             {children}
             <CreateTeamModal />
             <Toaster />

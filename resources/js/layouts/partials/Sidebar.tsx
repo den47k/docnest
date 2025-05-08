@@ -1,20 +1,32 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/lib/contexts/SidebarContext';
 import { useWorkspace } from '@/lib/contexts/WorkspaceContext';
+import { Link, usePage } from '@inertiajs/react';
 import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { FileText, Menu, Plus, Settings, Trash2, Users } from 'lucide-react';
 import React, { ElementType, useEffect, useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => {
+type SidebarProps = React.ComponentProps<'div'> & {
+  currentPath: string;
+};
+
+const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
+  ({ className, currentPath, ...props }, ref) => {
+    const { url: currentUrl } = usePage();
     const queryClient = useQueryClient();
     const { isSidebarOpen, toggleSidebar } = useSidebar();
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const {
-        currentTeam,
-      } = useWorkspace();
+    const { currentTeam } = useWorkspace();
+
+    const getPathFromUrl = (url: string): string => {
+      try {
+        return new URL(url).pathname;
+      } catch {
+        return new URL(url, window.location.origin).pathname;
+      }
+    };
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -77,8 +89,18 @@ const Sidebar = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
 
           {/* Sidebar Items */}
           <nav className="space-y-1 p-2">
-            <SidebarItem Icon={FileText} title="Documents" url="/" isActive />
-            <SidebarItem Icon={Users} title="Teams" url="/teams" />
+            <SidebarItem
+              Icon={FileText}
+              title="Documents"
+              url={route('index')}
+              isActive={getPathFromUrl(route('index')) === currentPath}
+            />
+            <SidebarItem
+              Icon={Users}
+              title="Teams"
+              url={route('teams.index')}
+              isActive={getPathFromUrl(route('teams.index')) === currentPath}
+            />
             <SidebarItem Icon={Trash2} title="Trash Can" url="/trash" />
             <SidebarItem Icon={Settings} title="Settings" url="/settings" />
           </nav>
@@ -97,9 +119,9 @@ type SidebarItemProps = {
   isActive?: boolean;
 };
 
-function SidebarItem({ Icon, title, url, isActive = false }: SidebarItemProps) {
+function SidebarItem({ Icon, title, url, isActive }: SidebarItemProps) {
   return (
-    <a
+    <Link
       href={url}
       className={twMerge(
         buttonVariants({ variant: 'ghost' }),
@@ -112,7 +134,7 @@ function SidebarItem({ Icon, title, url, isActive = false }: SidebarItemProps) {
       <div className="overflow-hidden text-ellipsis whitespace-nowrap">
         {title}
       </div>
-    </a>
+    </Link>
   );
 }
 

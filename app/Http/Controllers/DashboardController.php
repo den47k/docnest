@@ -27,7 +27,6 @@ class DashboardController extends Controller
 
             if ($team) {
                 $canManageDocuments = $user->can('create', [Document::class, $team]);
-                Log::info($canManageDocuments);
             }
         }
 
