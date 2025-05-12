@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->uuid('id');
             $table->string('title')->max(255);
-            $table->json('content');
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('team_id')->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();

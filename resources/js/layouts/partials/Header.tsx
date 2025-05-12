@@ -13,13 +13,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { PageProps } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { SidebarTrigger } from './Sidebar';
 
 export const Header = ({ showExtras = true }: { showExtras?: boolean }) => {
+  const { url } = usePage();
   const { auth } = usePage<PageProps>().props;
   const { invitations, ...user } = auth.user;
+
+  const queryParams = new URLSearchParams(url.split('?')[1] || '');
+  const searchValue = queryParams.get('search') || '';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -37,13 +41,22 @@ export const Header = ({ showExtras = true }: { showExtras?: boolean }) => {
         {/* Search Bar */}
         {showExtras && (
           <div className="max-w-[500px] flex-1 px-6">
-            <form>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const search = formData.get('search');
+                router.get(route('index'), { search });
+              }}
+            >
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
+                  name="search"
                   placeholder="Search documents..."
                   className="w-full rounded-full pl-10"
+                  defaultValue={searchValue}
                 />
               </div>
             </form>

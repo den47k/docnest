@@ -26,14 +26,28 @@ class DocumentController extends Controller
             Gate::authorize('viewAny', Document::class);
         }
 
+        $search = $request->input('search');
+        $page = $request->input('page', 1);
+        $perPage = 15;
+
         $query = $teamId === 'personal'
             ? Document::whereNull('team_id')->where('user_id', $user->id)
             : Document::where('team_id', $teamId);
 
-        $documents = $query->orderBy('updated_at', 'desc')->get();
+        if ($search) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $documents = $query->orderBy('updated_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'data' => $documents
+            'data' => $documents->items(),
+            'meta' => [
+                'current_page' => $documents->currentPage(),
+                'per_page' => $documents->perPage(),
+                'total' => $documents->total(),
+                'last_page' => $documents->lastPage(),
+            ],
         ]);
     }
 
