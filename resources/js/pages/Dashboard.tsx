@@ -80,21 +80,17 @@ function DashboardContent({
   };
 
   return (
-    <main className="container mx-auto max-w-[1200px] space-y-8 px-4 py-6">
+    <main className="container mx-auto max-w-[1200px] space-y-8 px-4 py-6 flex flex-col min-h-[calc(100vh-theme(spacing.16))]">
       {canManageDocuments && (
         <div className="flex items-center gap-4">
-          <Button
-            className="gap-2 rounded-full border px-6 shadow-sm"
-            variant={'ghost'}
-            onClick={createNewDocument}
-          >
+          <Button className="gap-2 rounded-full border px-6 shadow-sm" variant={"ghost"} onClick={createNewDocument}>
             <Plus className="h-5 w-5" />
             New
           </Button>
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 flex-1">
         <div className="flex items-center gap-2 text-muted-foreground">
           <File className="h-4 w-4" />
           <span className="text-sm">Documents</span>
@@ -105,25 +101,19 @@ function DashboardContent({
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {documents.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                document={doc}
-                canManageDocuments={canManageDocuments}
-              />
+              <DocumentCard key={doc.id} document={doc} canManageDocuments={canManageDocuments} />
             ))}
-            {hasNextPage && (
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                >
-                  {isFetchingNextPage ? 'Loading...' : 'Load More'}
-                </Button>
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {hasNextPage && (
+        <div className="flex justify-center py-6 mt-auto">
+          <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage} className="px-8">
+            {isFetchingNextPage ? "Loading..." : "Load More"}
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

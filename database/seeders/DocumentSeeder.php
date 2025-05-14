@@ -26,7 +26,6 @@ class DocumentSeeder extends Seeder
                 $documents[] = [
                     'id' => Str::uuid(),
                     'title' => "User Document $i",
-                    'content' => json_encode([]),
                     'user_id' => $user->id,
                     'team_id' => null,
                     'created_at' => now(),
@@ -40,7 +39,6 @@ class DocumentSeeder extends Seeder
                 $documents[] = [
                     'id' => Str::uuid(),
                     'title' => "Team Document $i",
-                    'content' => json_encode([]),
                     'user_id' => $team->owner_id,
                     'team_id' => $team->id,
                     'created_at' => now(),

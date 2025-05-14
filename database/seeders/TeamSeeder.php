@@ -47,7 +47,7 @@ class TeamSeeder extends Seeder
         for ($i = 1; $i <= 3; $i++) {
             $team = Team::create([
                 'owner_id' => $user->id,
-                'name' => "huy $i",
+                'name' => "user's $i",
                 'description' => "Team $i managed by user",
             ]);
 

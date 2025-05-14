@@ -70,19 +70,6 @@ class DocumentController extends Controller
             'title' => 'Untitled document',
             'user_id' => auth()->id(),
             'team_id' => $team?->id,
-            'content' => json_encode([
-                [
-                    'type' => 'doc',
-                    'content' => [
-                        [
-                            'type' => 'paragraph',
-                            'attrs' => [
-                                'textAlign' => null,
-                            ],
-                        ],
-                    ],
-                ],
-            ]),
         ]);
 
         return response()->json([

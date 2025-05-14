@@ -105,7 +105,6 @@ const roleDefinitions = {
     description: 'Can create and edit documents',
     permissions: [
       'Create/edit documents',
-      'Comment on documents',
       'Share documents',
     ],
   },
@@ -114,7 +113,7 @@ const roleDefinitions = {
     icon: <Shield className="h-4 w-4 text-blue-500" />,
     color: 'bg-blue-100 text-blue-800',
     description: 'Can only view documents',
-    permissions: ['View documents', 'Comment on documents'],
+    permissions: ['View documents'],
   },
 };
 

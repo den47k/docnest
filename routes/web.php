@@ -28,11 +28,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/teams/data', [TeamController::class, 'teamsData'])->name('teams.data');
     Route::post('/teams/select', [TeamController::class, 'updateCurrentTeam'])->name('teams.select');
-    Route::resource('teams', TeamController::class);
 
     Route::post('/teams/{team}/members', [TeamMemberController::class, 'invite'])->name('teams.members.invite');
     Route::delete('/teams/{team}/remove-member/{user}', [TeamMemberController::class, 'removeMember'])->name('teams.members.remove');
     Route::put('/teams/{team}/change-role/{user}', [TeamMemberController::class, 'changeRole'])->name('teams.members.change-role');
+
+    Route::resource('teams', TeamController::class);
 
     Route::resource('documents', DocumentController::class);
 

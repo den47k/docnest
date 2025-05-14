@@ -16,12 +16,14 @@ import { PageProps } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { SidebarTrigger } from './Sidebar';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Header = ({ showExtras = true }: { showExtras?: boolean }) => {
   const { url } = usePage();
   const { auth } = usePage<PageProps>().props;
   const { invitations, ...user } = auth.user;
 
+  const queryClient = useQueryClient();
   const queryParams = new URLSearchParams(url.split('?')[1] || '');
   const searchValue = queryParams.get('search') || '';
 
@@ -113,6 +115,9 @@ export const Header = ({ showExtras = true }: { showExtras?: boolean }) => {
                   href={route('logout')}
                   method="post"
                   as="button"
+                  onClick={(e) => {
+                    queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+                  }}
                 >
                   Log out
                 </Link>
