@@ -129,8 +129,6 @@ export default function TeamsPage({
   canManageTeam?: boolean;
 }) {
   const { user } = usePage().props.auth;
-  // const [teams, setTeams] = useState<Team[]>(mockTeams);
-  // const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [createTeamDialogOpen, setCreateTeamDialogOpen] = useState(false);
@@ -255,13 +253,13 @@ export default function TeamsPage({
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className='min-w-0'>
                           <h3 className="truncate font-medium">{team.name}</h3>
                           <p className="text-sm text-muted-foreground">
                             {team.membersCount} members
                           </p>
                         </div>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="flex-shrink-0">
                           {team.documentsCount} docs
                         </Badge>
                       </div>

@@ -27,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Team::factory()->definition();
+        TeamInvitation::factory()->definition();
+        Document::factory()->definition();
         Gate::policy(Document::class, DocumentPolicy::class);
         Gate::policy(Team::class, TeamPolicy::class);
         Gate::policy(TeamInvitation::class, TeamInvitationPolicy::class);

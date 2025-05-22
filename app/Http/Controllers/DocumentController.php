@@ -75,7 +75,7 @@ class DocumentController extends Controller
         return response()->json([
             'message' => 'Document created successfully',
             'document' => $document,
-        ]);
+        ], 201);
     }
 
     /**
