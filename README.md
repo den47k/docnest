@@ -64,7 +64,7 @@ npm run dev
 ```bash
 php artisan serve
 php artisan reverb:start
-php artisan queue:start
+php artisan queue:work
 ```
    
 ### Demo Credentials (for testing)
